@@ -5,6 +5,7 @@ phase: existing
 purpose: quality
 one_time: true
 tags: [go, quality, ci, linting, agents]
+author: Claude Sonnet 5.5 Medium
 ---
 
 # Set Up a Self-Improving Quality Gate for a Go Repository
