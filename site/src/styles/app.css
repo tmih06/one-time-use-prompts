@@ -10,3 +10,16 @@ html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/*
+ * Docs layout: the grid reserves a `1fr` gutter on the left so the main
+ * column stays centered at `--fd-layout-width`. `#nd-sidebar` is
+ * `position:absolute; inset:0` inside its sticky placeholder, so it stretches
+ * across that gutter too and its content aligns to the far edge — leaving a
+ * wide empty strip on the left. Pin the sidebar to its own column so it hugs
+ * the left edge and the gutter disappears.
+ */
+#nd-docs-layout > [data-sidebar-placeholder] > #nd-sidebar {
+  inset-inline-end: auto;
+  width: var(--fd-sidebar-width);
+}
