@@ -2,16 +2,10 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { createServerFn } from "@tanstack/react-start";
 import { docs, source } from "@/lib/source";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-  ViewOptionsPopover,
-} from "fumadocs-ui/layouts/docs/page";
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { baseOptions } from "@/lib/layout.shared";
 import { getPageImageUrl, gitConfig } from "@/lib/shared";
+import { PromptActions } from "@/components/prompt-actions";
 import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense, use } from "react";
@@ -54,24 +48,20 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
   const { toc } = use(page.load());
   const MDX = page.body;
 
-  // Page metadata lives in the right column (the ToC slot), not inline above
-  // the prompt — the main column is just the raw prompt source.
-  const meta = (
-    <div className="fd-page-meta flex flex-col gap-3">
-      <DocsTitle className="text-xl leading-snug">{page.title}</DocsTitle>
-      <DocsDescription className="mb-0 text-sm leading-relaxed">{page.description}</DocsDescription>
-      <div className="flex flex-wrap gap-2">
-        <MarkdownCopyButton markdownUrl={markdownUrl} />
-        <ViewOptionsPopover
-          markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`}
-        />
-      </div>
-    </div>
-  );
+  const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`;
 
   return (
-    <DocsPage toc={toc} full tableOfContent={{ enabled: true, header: meta }}>
+    <DocsPage
+      toc={toc}
+      full
+      tableOfContent={{
+        enabled: true,
+        component: <PromptActions markdownUrl={markdownUrl} githubUrl={githubUrl} />,
+      }}
+      tableOfContentPopover={{ enabled: false }}
+    >
+      <DocsTitle>{page.title}</DocsTitle>
+      <DocsDescription>{page.description}</DocsDescription>
       <DocsBody>
         <MDX components={useMDXComponents()} />
       </DocsBody>
