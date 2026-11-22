@@ -54,17 +54,24 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
   const { toc } = use(page.load());
   const MDX = page.body;
 
-  return (
-    <DocsPage toc={toc} tableOfContent={{ enabled: false }}>
-      <DocsTitle>{page.title}</DocsTitle>
-      <DocsDescription>{page.description}</DocsDescription>
-      <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+  // Page metadata lives in the right column (the ToC slot), not inline above
+  // the prompt — the main column is just the raw prompt source.
+  const meta = (
+    <div className="fd-page-meta flex flex-col gap-3">
+      <DocsTitle className="text-xl leading-snug">{page.title}</DocsTitle>
+      <DocsDescription className="mb-0 text-sm leading-relaxed">{page.description}</DocsDescription>
+      <div className="flex flex-wrap gap-2">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`}
         />
       </div>
+    </div>
+  );
+
+  return (
+    <DocsPage toc={toc} full tableOfContent={{ enabled: true, header: meta }}>
       <DocsBody>
         <MDX components={useMDXComponents()} />
       </DocsBody>
