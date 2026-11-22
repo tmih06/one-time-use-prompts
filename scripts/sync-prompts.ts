@@ -100,6 +100,14 @@ async function main(): Promise<void> {
     const body = await readFile(srcPath, "utf-8");
     const description = extractWhenToUse(body) ?? `${entry.phase} / ${entry.purpose}`;
 
+    // Show the raw prompt inside a fenced code block — readers copy it, not
+    // read it rendered. The fence must be longer than any backtick run in
+    // the prompt so embedded code blocks stay inside.
+    const prompt = body.trim();
+    const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
+    const fence = "`".repeat(maxRun);
+    const promptBlock = `${fence}markdown\n${prompt}\n${fence}`;
+
     const sourceLinks =
       entry.source === undefined
         ? ""
@@ -128,7 +136,7 @@ async function main(): Promise<void> {
       `description: ${yaml(description)}`,
       "---",
       "",
-      body.trim(),
+      promptBlock,
       about,
       "",
     ].join("\n");
