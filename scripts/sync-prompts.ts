@@ -3,9 +3,9 @@
  * Generate the fumadocs content tree from prompts/ + prompts/catalog.json.
  *
  * Prompt .md files stay metadata-free — this script injects the catalog
- * metadata (title, author, source, tags) as frontmatter and a small
- * "About this prompt" block so it is searchable without polluting the
- * source files that agents consume.
+ * metadata (title, phase, purpose, tags, author, source) as frontmatter —
+ * the site renders it as tags under the page title — so it is searchable
+ * without polluting the source files that agents consume.
  *
  * Output: site/content/docs/ — a generated directory. Do not hand-edit it.
  * Everything under it except .gitkeep is wiped and regenerated.
@@ -110,38 +110,24 @@ async function main(): Promise<void> {
     const prompt = body.trim();
     const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
     const fence = "`".repeat(maxRun);
-    const promptBlock = `${fence}markdown title="${entry.id}.md"\n${prompt}\n${fence}`;
-
-    const sourceLinks =
-      entry.source === undefined
-        ? ""
-        : (Array.isArray(entry.source) ? entry.source : [entry.source])
-            .map((u) => `- ${u}`)
-            .join("\n");
-
-    const about = [
-      "",
-      "---",
-      "",
-      "## About this prompt",
-      "",
-      `- **Phase:** ${entry.phase}`,
-      `- **Purpose:** ${entry.purpose}`,
-      `- **Tags:** ${entry.tags.join(", ")}`,
-      entry.author ? `- **Author:** ${entry.author}` : "",
-      entry.source ? `- **Source:**\n${sourceLinks}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const promptBlock = `${fence}markdown title="${entry.id}.md" lineNumbers\n${prompt}\n${fence}`;
 
     const mdx = [
       "---",
       `title: ${yaml(entry.title)}`,
       `description: ${yaml(description)}`,
+      `phase: ${yaml(entry.phase)}`,
+      `purpose: ${yaml(entry.purpose)}`,
+      `tags: ${JSON.stringify(entry.tags)}`,
+      ...(entry.author ? [`author: ${yaml(entry.author)}`] : []),
+      ...(entry.source === undefined
+        ? []
+        : [
+            `source: ${JSON.stringify(Array.isArray(entry.source) ? entry.source : [entry.source])}`,
+          ]),
       "---",
       "",
       promptBlock,
-      about,
       "",
     ].join("\n");
 

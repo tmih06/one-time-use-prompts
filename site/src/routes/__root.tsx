@@ -4,6 +4,7 @@ import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import SearchDialog from "@/components/search";
 import { DevTools } from "@/components/dev-tools";
+import { SmoothScroll } from "@/components/smooth-scroll";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -31,9 +32,10 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <RootProvider search={{ SearchDialog }}>
+        <RootProvider search={{ SearchDialog }} theme={{ defaultTheme: "dark" }}>
           <Outlet />
         </RootProvider>
+        <SmoothScroll />
         <DevTools />
         <Scripts />
       </body>

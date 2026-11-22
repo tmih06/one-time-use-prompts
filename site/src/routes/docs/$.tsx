@@ -6,6 +6,8 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layo
 import { baseOptions } from "@/lib/layout.shared";
 import { getPageImageUrl, gitConfig } from "@/lib/shared";
 import { PromptActions } from "@/components/prompt-actions";
+import { ContributeLabel, contributingUrl } from "@/components/contribute-link";
+import { PromptTags } from "@/components/prompt-tags";
 import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense, use } from "react";
@@ -61,6 +63,13 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
       tableOfContentPopover={{ enabled: false }}
     >
       <DocsTitle>{page.title}</DocsTitle>
+      <PromptTags
+        phase={page.phase}
+        purpose={page.purpose}
+        tags={page.tags}
+        author={page.author}
+        source={page.source}
+      />
       <DocsDescription>{page.description}</DocsDescription>
       <DocsBody>
         <MDX components={useMDXComponents()} />
@@ -73,7 +82,20 @@ function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
+    <DocsLayout
+      {...baseOptions()}
+      tree={pageTree}
+      links={[
+        {
+          type: "icon",
+          label: "Contribute yours!",
+          icon: <ContributeLabel />,
+          text: "Contribute yours!",
+          url: contributingUrl,
+          external: true,
+        },
+      ]}
+    >
       <Suspense>
         <Content path={path} markdownUrl={markdownUrl} />
       </Suspense>

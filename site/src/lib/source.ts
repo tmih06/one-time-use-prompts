@@ -1,12 +1,22 @@
 import { llms, loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
+import { pageSchema } from "fumadocs-core/source/schema";
 import { defineDocs } from "fumadocs-mdx/macro";
+import { z } from "zod";
 import { docsRoute } from "./shared";
 
 export const docs = defineDocs({
   dir: "content/docs",
   docs: {
     async: true,
+    // Catalog metadata injected by scripts/sync-prompts.ts (absent on index pages).
+    schema: pageSchema.extend({
+      phase: z.string().optional(),
+      purpose: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      author: z.string().optional(),
+      source: z.array(z.string()).optional(),
+    }),
     postprocess: {
       includeProcessedMarkdown: true,
     },

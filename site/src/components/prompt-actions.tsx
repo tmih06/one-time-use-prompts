@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "fumadocs-core/framework";
-import { ExternalLink, FileText } from "lucide-react";
+import { ArrowUpRight, FileText, GitBranch, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface PromptActionsProps {
@@ -11,69 +11,97 @@ interface PromptActionsProps {
 interface ActionLink {
   title: string;
   href: string;
-  icon?: ReactNode;
+  icon: ReactNode;
+}
+
+interface ActionGroup {
+  label: string;
+  links: ActionLink[];
 }
 
 const withBasePath = (href: string): string =>
   (import.meta.env?.BASE_URL ?? "").replace(/\/$/, "") + href;
 
 /**
- * Replaces the docs "On this page" ToC column on prompt pages: the raw links
- * that normally hide behind the "Open" popover are listed one by one so each
- * destination is a single click. Renders as the grid's `toc` column.
+ * Right-hand column of a prompt page: where the prompt can be opened, grouped
+ * into source links and AI assistants. A `surface` shell wrapping a darker
+ * inset well (Tuff's borderless layering). Renders as the docs grid's `toc`
+ * column, pinned at the height where the prompt block starts.
  */
 export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
   const pathname = usePathname();
   const pageUrl = typeof window === "undefined" ? pathname : window.location.href;
   const q = `Read ${pageUrl}, I want to ask questions about it.`;
 
-  const links: ActionLink[] = [
+  const groups: ActionGroup[] = [
     {
-      title: "View as Markdown",
-      href: withBasePath(markdownUrl),
-      icon: <FileText />,
+      label: "Source",
+      links: [
+        { title: "View as Markdown", href: withBasePath(markdownUrl), icon: <FileText /> },
+        { title: "Open in GitHub", href: githubUrl, icon: <GitBranch /> },
+      ],
     },
     {
-      title: "Open in GitHub",
-      href: githubUrl,
-      icon: <ExternalLink />,
-    },
-    {
-      title: "Open in Scira AI",
-      href: `https://scira.ai/?${new URLSearchParams({ q })}`,
-    },
-    {
-      title: "Open in ChatGPT",
-      href: `https://chatgpt.com/?${new URLSearchParams({ prompt: q, hints: "search" })}`,
-    },
-    {
-      title: "Open in Claude",
-      href: `https://claude.ai/new?${new URLSearchParams({ q })}`,
-    },
-    {
-      title: "Open in Cursor",
-      href: `https://cursor.com/link/prompt?${new URLSearchParams({ text: q })}`,
+      label: "Run in",
+      links: [
+        {
+          title: "Claude",
+          href: `https://claude.ai/new?${new URLSearchParams({ q })}`,
+          icon: <Sparkles />,
+        },
+        {
+          title: "ChatGPT",
+          href: `https://chatgpt.com/?${new URLSearchParams({ prompt: q, hints: "search" })}`,
+          icon: <Sparkles />,
+        },
+        {
+          title: "Scira",
+          href: `https://scira.ai/?${new URLSearchParams({ q })}`,
+          icon: <Sparkles />,
+        },
+        {
+          title: "Cursor",
+          href: `https://cursor.com/link/prompt?${new URLSearchParams({ text: q })}`,
+          icon: <Sparkles />,
+        },
+      ],
     },
   ];
 
   return (
-    <div className="sticky top-(--fd-docs-row-1) flex flex-col gap-1 [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden">
-      <h3 className="mb-1 inline-flex items-center gap-1.5 px-2 text-sm text-fd-muted-foreground">
-        <ExternalLink className="size-4" />
-        Open prompt in
-      </h3>
-      {links.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg p-2 text-sm text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4"
-        >
-          {link.icon}
-          {link.title}
-        </a>
-      ))}
-    </div>
+    <aside
+      aria-label="Open this prompt"
+      className="[grid-area:toc] self-stretch w-(--fd-toc-width) pe-4 pt-[19rem] pb-8 xl:layout:[--fd-toc-width:268px] max-xl:hidden"
+    >
+      <nav className="sticky top-[19rem] rounded-[1.375rem] bg-surface p-1.5 text-sm">
+        <div className="flex flex-col gap-3 rounded-2xl bg-surface-inset p-1.5">
+          {groups.map((group) => (
+            <section key={group.label}>
+              <h3 className="px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground">
+                {group.label}
+              </h3>
+              <ul className="flex flex-col">
+                {group.links.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="press group flex h-9 items-center gap-2.5 rounded-full px-3 text-foreground/90 hover:bg-foreground/[0.06] hover:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
+                    >
+                      <span className="text-muted-foreground group-hover:text-foreground">
+                        {link.icon}
+                      </span>
+                      <span className="flex-1 truncate">{link.title}</span>
+                      <ArrowUpRight className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </nav>
+    </aside>
   );
 }

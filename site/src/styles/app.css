@@ -1,6 +1,88 @@
 @import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/orbitron";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+@import "lenis/dist/lenis.css";
+
+/*
+ * Design tokens — modelled on tuffui.com.
+ * Dark-first near-black canvas with "borderless layers": instead of outlining
+ * boxes, a lighter `surface` shell (6px padding, 22px radius) wraps a darker
+ * `surface-inset` well. Pills for every control, one brand blue, Geist type,
+ * Geist Mono for counts and Orbitron for the wordmark.
+ */
+@theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, monospace;
+  --font-logo: "Orbitron Variable", "Geist Variable", sans-serif;
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 22px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-surface-inset: var(--surface-inset);
+  --color-surface-raised: var(--surface-raised);
+  --color-brand: var(--brand);
+}
+
+:root {
+  --background: #f7f7f8;
+  --foreground: #161618;
+  --surface: #ededef;
+  --surface-inset: #ffffff;
+  --surface-raised: #e2e2e4;
+  --border: #16161812;
+  --muted-foreground: #636368;
+  --brand: #0071e3;
+}
+
+.dark {
+  --background: #0c0c0c;
+  --foreground: #f5f5f5;
+  --surface: #191919;
+  --surface-inset: #101010;
+  --surface-raised: #252525;
+  --border: #ffffff0f;
+  --muted-foreground: #98989b;
+  --brand: #0a84ff;
+}
+
+/* Map the palette onto Fumadocs' tokens so its own components follow along. */
+:root,
+.dark {
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-muted: var(--surface);
+  --color-fd-muted-foreground: var(--muted-foreground);
+  --color-fd-popover: var(--surface-raised);
+  --color-fd-popover-foreground: var(--foreground);
+  --color-fd-card: var(--surface);
+  --color-fd-card-foreground: var(--foreground);
+  --color-fd-border: var(--border);
+  --color-fd-primary: var(--foreground);
+  --color-fd-primary-foreground: var(--background);
+  --color-fd-secondary: var(--surface);
+  --color-fd-secondary-foreground: var(--foreground);
+  --color-fd-accent: color-mix(in oklab, var(--foreground) 7%, transparent);
+  --color-fd-accent-foreground: var(--foreground);
+  --color-fd-ring: color-mix(in oklab, var(--brand) 60%, transparent);
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: var(--surface);
+  --color-fd-secondary: var(--surface);
+  --color-fd-muted-foreground: var(--muted-foreground);
+}
 
 html {
   scrollbar-gutter: stable;
@@ -9,6 +91,89 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+body {
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: 2px;
+}
+
+/* Sticky translucent header, no hairline — the page just blurs under it. */
+#nd-nav {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  backdrop-filter: blur(24px);
+  border-bottom-color: transparent;
+}
+
+/* Headings: tight tracking, semibold. */
+#nd-page h1 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.prose :is(h2, h3) {
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+/* Wordmark (tighter inside the narrow sidebar so it stays on one line) */
+.font-logo {
+  letter-spacing: 0.08em;
+}
+
+#nd-sidebar .font-logo {
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* "Contribute yours!" sits in the sidebar footer box, filling the gap between
+   the GitHub icon and the theme toggle. */
+#nd-sidebar a[aria-label="Contribute yours!"] {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  min-width: 0;
+  padding-inline: 0.5rem 0.25rem;
+  border-radius: 999px;
+}
+
+/* Press feedback on anything marked interactive, like Tuff's active:scale. */
+.press {
+  transition:
+    background-color 150ms var(--ease-out, ease-out),
+    color 150ms,
+    scale 150ms var(--ease-out, ease-out);
+}
+.press:active {
+  scale: 0.97;
+}
+
+/* Sidebar: no outline on the rail; active page is a soft pill, no side line. */
+#nd-sidebar {
+  background: var(--background);
+}
+
+#nd-sidebar a[data-active="true"] {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  color: var(--foreground);
+  font-weight: 500;
+  border-radius: 1rem;
+}
+
+#nd-sidebar a[data-active="true"]::before {
+  display: none;
 }
 
 /*
@@ -25,33 +190,144 @@ html > body[data-scroll-locked] {
 }
 
 /*
- * Prompt source blocks: the raw .md is shown verbatim in a code block so
- * readers copy it as-is. Restyle to read like a file card — roomier text,
- * softer border, a subtle shadow, and no inner height cap so the prompt
- * scrolls with the page instead of inside the block.
+ * Prompt source block — layered surfaces, no border: the figure is the
+ * `surface` shell (6px padding, 22px radius), the code area is the darker
+ * `surface-inset` well inside it.
  */
 figure.shiki {
-  border-color: color-mix(in oklch, var(--color-fd-border), var(--color-fd-foreground) 10%);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 8px 24px -8px rgb(0 0 0 / 0.08);
+  border: 0;
+  border-radius: 1.375rem;
+  background: var(--surface);
+  padding: 0.375rem;
+  box-shadow: none;
 }
 
-.dark figure.shiki {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.4),
-    0 8px 24px -8px rgb(0 0 0 / 0.5);
+figure.shiki > div:first-child:has(> figcaption) {
+  height: 2.5rem;
+  border-bottom: 0;
+  background: transparent;
+  padding-inline: 0.625rem;
 }
 
-/* Title bar (filename + copy button) */
-figure.shiki > figcaption,
-figure.shiki > header {
+figure.shiki figcaption {
+  font-family: var(--font-mono);
   font-size: 0.75rem;
-  letter-spacing: 0.02em;
 }
 
 figure.shiki .fd-scroll-container {
+  background: var(--surface-inset);
+  border-radius: 1rem;
+}
+
+/*
+ * Prompt tags: a per-tag hue (`--h`, set inline from a hash of the label)
+ * feeds a tinted pill. Same recipe as Tuff's `bg-brand/15 text-brand` badge,
+ * but one hue per tag. `data-strong` (phase, purpose) is a touch heavier.
+ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.5rem;
+  padding-inline: 0.625rem;
+  border-radius: 999px;
+  background: oklch(0.93 0.05 var(--h));
+  color: oklch(0.42 0.15 var(--h));
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tag[data-strong] {
+  background: oklch(0.88 0.08 var(--h));
+  color: oklch(0.35 0.16 var(--h));
+  text-transform: capitalize;
+}
+
+.dark .tag {
+  background: oklch(0.72 0.14 var(--h) / 0.16);
+  color: oklch(0.82 0.12 var(--h));
+}
+
+.dark .tag[data-strong] {
+  background: oklch(0.72 0.14 var(--h) / 0.26);
+  color: oklch(0.9 0.1 var(--h));
+}
+
+.tag.tag-neutral {
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  color: var(--muted-foreground);
+}
+
+/*
+ * Long prompts: cap the block's height and scroll inside it with a slim bar,
+ * and wrap long lines instead of scrolling sideways. Fumadocs sets the `pre`
+ * to `w-max` (so it can overflow horizontally); pin it to the container
+ * width and let the text wrap. Wrapped rows keep the line-number gutter's
+ * left padding, so continuations stay aligned under the first row.
+ */
+figure.shiki .fd-scroll-container {
   font-size: 0.85rem;
   line-height: 1.75;
-  max-height: none;
+  max-height: min(72vh, 46rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--color-fd-foreground) 25%, transparent) transparent;
+}
+
+figure.shiki pre {
+  width: 100%;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+} /*
+ * Prompt source block: a flat 1px-bordered card with a muted title bar —
+ * no shadow, no tint — so it reads like a Vercel/Linear code panel.
+ */
+figure.shiki {
+  border-color: var(--color-fd-border);
+  background: var(--color-fd-card);
+  box-shadow: none;
+}
+
+.dark figure.shiki {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.02) inset;
+}
+
+figure.shiki > div:first-child:has(> figcaption) {
+  background: var(--color-fd-muted);
+  border-bottom-color: var(--color-fd-border);
+}
+
+figure.shiki figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/*
+ * Long prompts: cap the block's height and scroll inside it with a slim bar,
+ * and wrap long lines instead of scrolling sideways. Fumadocs sets the `pre`
+ * to `w-max` (so it can overflow horizontally); pin it to the container
+ * width and let the text wrap. Wrapped rows keep the line-number gutter's
+ * left padding, so continuations stay aligned under the first row.
+ */
+figure.shiki .fd-scroll-container {
+  font-size: 0.85rem;
+  line-height: 1.75;
+  max-height: min(72vh, 46rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--color-fd-foreground) 25%, transparent) transparent;
+}
+
+figure.shiki pre {
+  width: 100%;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
