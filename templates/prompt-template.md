@@ -5,6 +5,9 @@ phase: {{creation|existing}}
 purpose: {{FOLDER_NAME}}
 one_time: true
 tags: [{{TAG_1}}, {{TAG_2}}]
+# Optional: where this prompt came from — a URL (e.g., an X post, blog, or repo),
+# or a list of URLs. Remove this line entirely if the prompt is original.
+source: {{SOURCE_URL}}
 ---
 
 # {{PROMPT_TITLE}}

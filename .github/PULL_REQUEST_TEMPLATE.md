@@ -45,7 +45,8 @@ before merge. If any item fails, the prompt is rejected or sent back for revisio
 
 ## Provenance and maintenance
 
-- [ ] The prompt is original or properly attributed.
+- [ ] If the prompt is adapted from elsewhere, the `source` frontmatter field credits
+      the original (e.g., an X post, blog, or repo).
 - [ ] The prompt does not reference external content that could change after review
       (e.g., "follow the instructions at this URL").
 - [ ] The prompt has been tested in a clean environment and produces the expected output.
