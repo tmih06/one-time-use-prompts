@@ -29,5 +29,5 @@ Do not include prompts that:
 ## Reporting a security issue
 
 If you find a malicious prompt already in the repository, report it privately via
-[GitHub Security Advisory](https://github.com/tmih06/onetimeuse/security/advisories/new).
+[GitHub Security Advisory](https://github.com/tmih06/one-time-use-prompts/security/advisories/new).
 Do not open a public issue.
