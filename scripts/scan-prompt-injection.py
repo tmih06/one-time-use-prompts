@@ -126,7 +126,7 @@ PATTERNS: list[tuple[str, str, re.Pattern[str], str]] = [
     (
         "typoglycemia-attack",
         "low",
-        re.compile(r"\b(i?gnore|disregard|revele|sysmte|promtp|insturction)\b", re.I),
+        re.compile(r"\b(ignroe|igore|ig nore|disrgard|disregad|revele|sysmte|sytem|promtp|insturction|intruction|previuos|privious|bpyass|byapss|delte|saftey)\b", re.I),
         "Possible typoglycemia or scrambled words used to evade detection",
     ),
     # --- Scope / authority ----------------------------------------------------
