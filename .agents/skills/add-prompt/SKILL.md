@@ -5,23 +5,27 @@ description: Add a new one-time-use prompt to this repository in the correct for
 
 # /add-prompt
 
-Help the user add a new prompt to this repo. Every prompt lives in
-`prompts/<phase>/<purpose>/<kebab-name>.md` and must match
-`templates/prompt-template.md`. The full rules are in `CONTRIBUTING.md` — this skill is
-the fast path.
+Help the user add a new prompt to this repo. A prompt is two parts:
+
+- **Body** — `prompts/<phase>/<purpose>/<kebab-name>.md` containing ONLY the prompt text
+  (no frontmatter). This file is fed to an agent, so keep metadata out of it.
+- **Metadata** — an entry in `prompts/catalog.json`.
+
+`templates/prompt-template.md` shows the body shape. The full rules are in
+`CONTRIBUTING.md` — this skill is the fast path.
 
 ## Procedure
 
-### 1. Get the prompt text
+### 1. Get the prompt text and missing metadata
 
 - If the user pasted the prompt, use it as-is.
 - If the user gave a file path, read it.
 - If the user gave a link (X post, blog, gist, repo file), fetch it, extract the prompt
-  text, and remember the URL — it becomes the `source` frontmatter field.
+  text, and remember the URL — it becomes the `source` field in the catalog.
 - **Ask for anything that is missing. Do not guess and do not silently drop info.**
   Before writing, confirm with the user:
-  - `author` — who wrote this prompt (name, handle, or profile URL). If the prompt came
-    from elsewhere, ask even if the user did not volunteer it.
+  - `author` — who wrote this prompt (name, handle, or profile URL). Ask even if the
+    user did not volunteer it.
   - `source` — the original URL, if the prompt is not original and none was given.
   - `phase` / `purpose` — if the classification is ambiguous.
   - `tags` — if none are obvious from the content.
@@ -45,54 +49,50 @@ Ask: is the project already built when this prompt runs?
 Pick exactly one folder. If none fits, propose a new purpose folder to the user before
 creating it (lowercase, singular). If the phase is ambiguous, ask — do not guess.
 
-### 3. Create the prompt file
+### 3. Write the prompt file
 
-Copy `templates/prompt-template.md` and fill it in:
+Copy `templates/prompt-template.md` to `prompts/<phase>/<purpose>/<kebab-name>.md` and
+fill it in. Keep the author's content faithful — reformat, do not rewrite meaning.
 
-- `id` — unique kebab-case id (usually the filename). Grep the repo to confirm it is unused.
-- `title` — title case, describes the action.
-- `phase` / `purpose` — must match the folder path exactly.
-- `one_time` — always `true`. If the prompt is meant to run repeatedly, tell the user it
-  does not belong in this repo.
-- `tags` — 2–5 lowercase tags.
-- `author` — include only when known; name, handle, or profile URL. Omit entirely if
-  unknown and the user does not want to say.
-- `source` — include only if the prompt came from elsewhere; set the original URL.
-  Omit the field entirely for original prompts.
+- Start with `# Title` — **no frontmatter**.
+- Sections in order: `> **When to use:**`, `## Context`, `## Goal`, `## Inputs`,
+  `## Instructions`, `## Output format`, `## Guardrails`.
+- Use `{{UPPER_SNAKE}}` placeholders for anything the user must supply. Never hard-code a
+  specific company, framework, or path where a placeholder belongs. If the prompt is
+  self-contained, say so in **Inputs**.
+- Preserve the author's structure inside **Instructions** (phases, numbered steps).
+- If the source prompt has rules up front, put them in **Guardrails** and note in
+  Context that they are binding.
+- End with an **Output format** that asks for a concrete artifact, not chat output.
 
-Filename: lowercase kebab-case describing the action (`setup-go-quality-gate.md`).
+Filename = the `id` (lowercase kebab-case describing the action).
 
-### 4. Restructure the content into the required sections
+### 4. Add the catalog entry
 
-Keep the author's content faithful — reformat, do not rewrite meaning. Map to this order:
+Append to `prompts/catalog.json`:
 
-1. `> **When to use:**` — one sentence naming the exact moment to run this prompt.
-2. `## Context` — what the agent needs to know; state assumptions explicitly.
-3. `## Goal` — the single outcome produced.
-4. `## Inputs` — `{{PLACEHOLDER}}` tokens the user must replace. If the prompt is
-   self-contained (discovers everything from the repo itself), say so.
-5. `## Instructions` — the imperative steps. Preserve the author's structure
-   (phases, numbered steps) inside this section.
-6. `## Output format` — the concrete, reviewable artifact produced.
-7. `## Guardrails` — hard constraints: what the agent must never do. If the source prompt
-   has rules up front, move them here and note in Context to read them first.
-
-Use `{{UPPER_SNAKE}}` placeholders for anything the user must supply. Never hard-code a
-specific company, framework version, or path where a placeholder belongs.
+```json
+{
+  "id": "<filename without .md>",
+  "title": "Title Case",
+  "phase": "creation|existing",
+  "purpose": "<folder>",
+  "one_time": true,
+  "tags": ["2-5", "lowercase"],
+  "author": "optional — omit entirely if unknown",
+  "source": "optional URL or list — omit entirely if original"
+}
+```
 
 ### 5. Validate
 
-Run before committing:
-
 ```bash
+python3 scripts/validate-catalog.py
 python3 scripts/scan-prompt-injection.py prompts/<phase>/<purpose>/<file>.md
 ```
 
-Must pass with no critical/high findings. Then verify by reading the file:
-
-- frontmatter fields present, `phase`/`purpose` match the path, `id` unique
-- all seven sections present in order
-- placeholders used in Inputs also appear in Instructions
+Both must pass. Then re-read the file and confirm: all seven sections in order, no
+frontmatter, placeholders in **Inputs** match those in **Instructions**.
 
 ### 6. Update docs and commit
 
@@ -104,6 +104,7 @@ Must pass with no critical/high findings. Then verify by reading the file:
 ## Do not
 
 - Do not water down or "improve" the author's content — reformat only.
-- Do not skip the scanner even if the prompt looks safe.
+- Do not put frontmatter in a prompt file — metadata belongs in `catalog.json`.
+- Do not skip the scanner or the catalog validator even if the prompt looks safe.
 - Do not put a recurring-use prompt in this repo.
-- Do not add an index entry for a single prompt in `README.md` — it lists folders only.
+- Do not add a per-prompt index to `README.md` — it lists folders only.

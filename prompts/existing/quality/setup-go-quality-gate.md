@@ -1,13 +1,3 @@
----
-id: setup-go-quality-gate
-title: Set Up a Self-Improving Quality Gate for a Go Repository
-phase: existing
-purpose: quality
-one_time: true
-tags: [go, quality, ci, linting, agents]
-author: Claude Sonnet 5.5 Medium
----
-
 # Set Up a Self-Improving Quality Gate for a Go Repository
 
 > **When to use:** Once per Go repository, when the code is already built and you want an

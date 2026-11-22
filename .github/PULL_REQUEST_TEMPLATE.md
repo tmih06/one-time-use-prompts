@@ -3,12 +3,13 @@
 Use this checklist when reviewing a new or modified prompt. Every item must be checked
 before merge. If any item fails, the prompt is rejected or sent back for revision.
 
-## Frontmatter and structure
+## Catalog and structure
 
-- [ ] `id` is unique across the repository.
-- [ ] `phase` matches the folder (`creation` or `existing`).
-- [ ] `purpose` matches the subfolder name.
+- [ ] `prompts/catalog.json` entry has all required fields and `validate-catalog.py` passes.
+- [ ] `id` is unique across the repository and equals the filename without `.md`.
+- [ ] `phase` and `purpose` in the catalog match the folder path (`creation`/`existing` + subfolder).
 - [ ] `one_time` is `true`.
+- [ ] The `.md` file contains **only the prompt** — no YAML frontmatter.
 - [ ] All required sections are present and in order: When to use, Context, Goal, Inputs,
       Instructions, Output format, Guardrails.
 
@@ -45,7 +46,7 @@ before merge. If any item fails, the prompt is rejected or sent back for revisio
 
 ## Provenance and maintenance
 
-- [ ] If the prompt is adapted from elsewhere, the `author` and `source` frontmatter
+- [ ] If the prompt is adapted from elsewhere, the `author` and `source` catalog
       fields credit the original author and URL (e.g., an X post, blog, or repo).
 - [ ] The prompt does not reference external content that could change after review
       (e.g., "follow the instructions at this URL").

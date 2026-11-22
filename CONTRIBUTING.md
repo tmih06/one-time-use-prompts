@@ -37,51 +37,76 @@ explain why. Keep folder names lowercase and singular.
 
 ## Prompt format
 
-Copy [templates/prompt-template.md](templates/prompt-template.md) and fill it in. Every
-prompt must:
+Each prompt is one markdown file that contains **only the prompt text** — no YAML
+frontmatter. The file is fed directly to an agent, so metadata that the agent does not
+need must not be in it. All metadata lives in [`prompts/catalog.json`](prompts/catalog.json).
 
-1. Include YAML frontmatter with these fields:
+Copy [templates/prompt-template.md](templates/prompt-template.md) and fill it in.
 
-   | Field | Type | Example |
-   |-------|------|---------|
-   | `id` | string | `your-prompt-id` |
-   | `title` | string | `Your Prompt Title` |
-   | `phase` | `creation` or `existing` | `creation` |
-   | `purpose` | string (folder name) | `strategy` |
-   | `one_time` | boolean, always `true` | `true` |
-   | `tags` | list of strings | `[architecture, planning]` |
-   | `author` | string, optional | `tmih06` or `https://x.com/user` |
-   | `source` | URL or list of URLs, optional | `https://x.com/user/status/123` |
+### 1. Add a catalog entry
 
-2. Use `{{PLACEHOLDER}}` tokens for values the user must fill in. Never hard-code a
-   specific company, framework, or path where a placeholder would do.
+Append an object to `prompts/catalog.json` under `prompts`:
 
-3. Have these sections, in order: **When to use**, **Context**, **Goal**, **Inputs**,
-   **Instructions**, **Output format**, **Guardrails**.
+```json
+{
+  "id": "your-prompt-id",
+  "title": "Your Prompt Title",
+  "phase": "existing",
+  "purpose": "quality",
+  "one_time": true,
+  "tags": ["quality", "ci"],
+  "author": "name, handle, or profile URL (optional)",
+  "source": "https://x.com/user/status/123 (optional, or a list of URLs)"
+}
+```
 
-4. End with an **Output format** that asks for a concrete, reviewable artifact — a
-   decision record, config file, or plan. Avoid "just answer in chat" prompts.
+| Field | Required | Notes |
+|-------|----------|-------|
+| `id` | yes | Kebab-case, must equal the filename without `.md` |
+| `title` | yes | Title case |
+| `phase` | yes | `creation` or `existing`, must match the folder |
+| `purpose` | yes | Folder name, must match the folder |
+| `one_time` | yes | Always `true` |
+| `tags` | yes | 2–5 lowercase strings |
+| `author` | no | Who wrote it. Omit entirely if unknown |
+| `source` | no | URL or list of URLs. Omit entirely if original |
 
-5. Set `author` to who wrote the prompt and `source` to where it came from (X post,
-   blog, another repo) when known. Omit each field entirely when not applicable. If
-   either is unknown for a prompt that came from elsewhere, ask the contributor — do
-   not guess or drop it silently.
+The file path is derived as `prompts/<phase>/<purpose>/<id>.md`. Set `author` and
+`source` when a prompt came from elsewhere; if either is unknown, ask the contributor —
+do not guess or drop it silently.
+
+### 2. Write the prompt file
+
+- Start with `# {{TITLE}}` — no frontmatter, no metadata.
+- Use `{{PLACEHOLDER}}` tokens for values the user must fill in. Never hard-code a
+  specific company, framework, or path where a placeholder would do.
+- Have these sections, in order: **When to use** (a `>` blockquote), **Context**,
+  **Goal**, **Inputs**, **Instructions**, **Output format**, **Guardrails**.
+- End with an **Output format** that asks for a concrete, reviewable artifact — a
+  decision record, config file, or plan. Avoid "just answer in chat" prompts.
+
+### 3. Validate
+
+```bash
+python3 scripts/validate-catalog.py        # metadata <-> file consistency
+python3 scripts/scan-prompt-injection.py prompts/existing/quality/your-prompt.md
+```
 
 ## Naming
 
 Prompt filenames are lowercase kebab-case and describe the action:
-`your-prompt-name.md`.
+`your-prompt-name.md`. The filename must equal the catalog `id`.
 
 ## Final checklist
 
-- [ ] Frontmatter is valid and `phase` / `purpose` match the folder path.
-- [ ] `id` is unique across the repo (grep for it).
+- [ ] Catalog entry has all required fields; `phase`/`purpose`/`id` match the file path.
+- [ ] Prompt file has **no** frontmatter — it starts with the `# Title` heading.
+- [ ] `id` is unique across the catalog.
 - [ ] If the prompt was adapted from elsewhere, `author` and `source` credit the
       original author and URL.
 - [ ] Placeholders are consistent between **Inputs** and **Instructions**.
 - [ ] **Guardrails** state whether the agent may modify files.
-- [ ] The prompt passes the injection scanner:
-      `python3 scripts/scan-prompt-injection.py prompts/path/to/your-prompt.md`
+- [ ] The prompt passes the injection scanner and `validate-catalog.py`.
 - [ ] The prompt is listed in the [README.md](README.md) purpose folder table if it
       introduces a new folder, or in the folder's index if one exists.
 - [ ] Markdown links resolve.

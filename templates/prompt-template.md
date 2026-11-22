@@ -1,17 +1,25 @@
----
-id: {{PROMPT_ID}}
-title: {{PROMPT_TITLE}}
-phase: {{creation|existing}}
-purpose: {{FOLDER_NAME}}
-one_time: true
-tags: [{{TAG_1}}, {{TAG_2}}]
-# Optional: who wrote this prompt — a name, handle, or profile URL.
-# Remove this line entirely if the author prefers not to say.
-author: {{AUTHOR_NAME_OR_HANDLE}}
-# Optional: where this prompt came from — a URL (e.g., an X post, blog, or repo),
-# or a list of URLs. Remove this line entirely if the prompt is original.
-source: {{SOURCE_URL}}
----
+<!--
+Prompt template — copy this file and fill in the {{PLACEHOLDERS}}.
+
+Prompt files contain ONLY the prompt text. Do not add YAML frontmatter here —
+metadata (id, title, phase, purpose, author, source, tags) lives in
+prompts/catalog.json so the file itself is clean input for an agent.
+
+Add an entry to prompts/catalog.json:
+
+  {
+    "id": "<kebab-case, must match this filename without .md>",
+    "title": "<Prompt Title>",
+    "phase": "creation | existing",
+    "purpose": "<folder name>",
+    "one_time": true,
+    "tags": ["tag1", "tag2"],
+    "author": "<optional: name, handle, or profile URL>",
+    "source": "<optional: URL or list of URLs>"
+  }
+
+Then validate: python3 scripts/validate-catalog.py
+-->
 
 # {{PROMPT_TITLE}}
 
@@ -34,6 +42,9 @@ Replace these placeholders before running:
 
 - `{{PROJECT_DESCRIPTION}}` — {{what to put here}}
 - `{{CONSTRAINT}}` — {{what to put here}}
+
+Or, if the prompt is self-contained and discovers everything from the repository
+itself, state that here instead of listing placeholders.
 
 ## Instructions
 
