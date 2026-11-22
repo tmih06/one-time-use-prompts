@@ -18,8 +18,14 @@ the fast path.
 - If the user gave a file path, read it.
 - If the user gave a link (X post, blog, gist, repo file), fetch it, extract the prompt
   text, and remember the URL — it becomes the `source` frontmatter field.
-- If the prompt is incomplete or ambiguous (e.g., unclear what it produces or when to run
-  it), ask before writing.
+- **Ask for anything that is missing. Do not guess and do not silently drop info.**
+  Before writing, confirm with the user:
+  - `author` — who wrote this prompt (name, handle, or profile URL). If the prompt came
+    from elsewhere, ask even if the user did not volunteer it.
+  - `source` — the original URL, if the prompt is not original and none was given.
+  - `phase` / `purpose` — if the classification is ambiguous.
+  - `tags` — if none are obvious from the content.
+  Ask once, collect the answers, then write. Never fill optional fields with guesses.
 
 ### 2. Classify phase and purpose
 
@@ -49,6 +55,8 @@ Copy `templates/prompt-template.md` and fill it in:
 - `one_time` — always `true`. If the prompt is meant to run repeatedly, tell the user it
   does not belong in this repo.
 - `tags` — 2–5 lowercase tags.
+- `author` — include only when known; name, handle, or profile URL. Omit entirely if
+  unknown and the user does not want to say.
 - `source` — include only if the prompt came from elsewhere; set the original URL.
   Omit the field entirely for original prompts.
 

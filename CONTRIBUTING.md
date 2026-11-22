@@ -50,6 +50,7 @@ prompt must:
    | `purpose` | string (folder name) | `strategy` |
    | `one_time` | boolean, always `true` | `true` |
    | `tags` | list of strings | `[architecture, planning]` |
+   | `author` | string, optional | `tmih06` or `https://x.com/user` |
    | `source` | URL or list of URLs, optional | `https://x.com/user/status/123` |
 
 2. Use `{{PLACEHOLDER}}` tokens for values the user must fill in. Never hard-code a
@@ -61,9 +62,10 @@ prompt must:
 4. End with an **Output format** that asks for a concrete, reviewable artifact — a
    decision record, config file, or plan. Avoid "just answer in chat" prompts.
 
-5. If the prompt came from elsewhere — an X post, a blog, another repo — set `source`
-   in the frontmatter so readers can trace it back to the original. Omit the field
-   entirely if the prompt is original.
+5. Set `author` to who wrote the prompt and `source` to where it came from (X post,
+   blog, another repo) when known. Omit each field entirely when not applicable. If
+   either is unknown for a prompt that came from elsewhere, ask the contributor — do
+   not guess or drop it silently.
 
 ## Naming
 
@@ -74,7 +76,8 @@ Prompt filenames are lowercase kebab-case and describe the action:
 
 - [ ] Frontmatter is valid and `phase` / `purpose` match the folder path.
 - [ ] `id` is unique across the repo (grep for it).
-- [ ] If the prompt was adapted from elsewhere, `source` credits the original URL.
+- [ ] If the prompt was adapted from elsewhere, `author` and `source` credit the
+      original author and URL.
 - [ ] Placeholders are consistent between **Inputs** and **Instructions**.
 - [ ] **Guardrails** state whether the agent may modify files.
 - [ ] The prompt passes the injection scanner:

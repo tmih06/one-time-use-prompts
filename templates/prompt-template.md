@@ -5,6 +5,9 @@ phase: {{creation|existing}}
 purpose: {{FOLDER_NAME}}
 one_time: true
 tags: [{{TAG_1}}, {{TAG_2}}]
+# Optional: who wrote this prompt — a name, handle, or profile URL.
+# Remove this line entirely if the author prefers not to say.
+author: {{AUTHOR_NAME_OR_HANDLE}}
 # Optional: where this prompt came from — a URL (e.g., an X post, blog, or repo),
 # or a list of URLs. Remove this line entirely if the prompt is original.
 source: {{SOURCE_URL}}
