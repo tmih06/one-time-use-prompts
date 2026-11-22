@@ -25,7 +25,7 @@ The primary risks are:
 If you discover a malicious or unsafe prompt in this repository, please report it
 privately:
 
-- Open a [GitHub Security Advisory](https://github.com/OWNER/REPO/security/advisories/new)
+- Open a [GitHub Security Advisory](https://github.com/tmih06/onetimeuse/security/advisories/new)
   (replace `OWNER/REPO` with the actual repository path).
 - Do **not** open a public issue for security vulnerabilities.
 - Include the file path, the suspicious content, and why you believe it is malicious.
