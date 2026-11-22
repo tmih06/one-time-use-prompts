@@ -23,3 +23,35 @@ html > body[data-scroll-locked] {
   inset-inline-end: auto;
   width: var(--fd-sidebar-width);
 }
+
+/*
+ * Prompt source blocks: the raw .md is shown verbatim in a code block so
+ * readers copy it as-is. Restyle to read like a file card — roomier text,
+ * softer border, a subtle shadow, and no inner height cap so the prompt
+ * scrolls with the page instead of inside the block.
+ */
+figure.shiki {
+  border-color: color-mix(in oklch, var(--color-fd-border), var(--color-fd-foreground) 10%);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 8px 24px -8px rgb(0 0 0 / 0.08);
+}
+
+.dark figure.shiki {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 8px 24px -8px rgb(0 0 0 / 0.5);
+}
+
+/* Title bar (filename + copy button) */
+figure.shiki > figcaption,
+figure.shiki > header {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+figure.shiki .fd-scroll-container {
+  font-size: 0.85rem;
+  line-height: 1.75;
+  max-height: none;
+}

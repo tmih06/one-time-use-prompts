@@ -110,7 +110,7 @@ async function main(): Promise<void> {
     const prompt = body.trim();
     const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
     const fence = "`".repeat(maxRun);
-    const promptBlock = `${fence}markdown\n${prompt}\n${fence}`;
+    const promptBlock = `${fence}markdown title="${entry.id}.md"\n${prompt}\n${fence}`;
 
     const sourceLinks =
       entry.source === undefined
