@@ -38,32 +38,31 @@ schema.
 > a file for you to approve. Check each prompt's **Guardrails** section before letting an
 > agent apply changes directly to a repository.
 
-## Index
+## Purpose folders
 
-### Creation — greenfield
+Each phase is divided into purpose folders. Add prompts to the folder that matches their
+intent. The current folders are:
 
-| Purpose | Prompt | Use it to |
-|---------|--------|-----------|
-| Strategy | [Choose the best-fit tech stack](prompts/creation/strategy/choose-tech-stack.md) | Pick languages, frameworks, and runtimes from real constraints. |
-| Strategy | [Choose external providers](prompts/creation/strategy/choose-external-providers.md) | Decide what to buy vs. build (auth, DB, email, payments, hosting...). |
-| Strategy | [Define the architecture](prompts/creation/strategy/define-architecture.md) | Lock in boundaries, data flow, and quality attributes before coding. |
-| Foundation | [Scaffold the project structure](prompts/creation/foundation/scaffold-project-structure.md) | Lay out folders, modules, and conventions for a new repo. |
-| Foundation | [Set up the development environment](prompts/creation/foundation/setup-development-environment.md) | Define toolchain, local setup, and onboarding steps. |
-| Governance | [Choose a license](prompts/creation/governance/choose-license.md) | Pick an OSS license that matches your goals. |
-| Governance | [Set up repository policies](prompts/creation/governance/setup-repo-policies.md) | Establish branch protection, CODEOWNERS, and contribution rules. |
+### Creation (`prompts/creation/`)
 
-### Existing — brownfield
+| Folder | Use for |
+|--------|---------|
+| `strategy/` | High-level decisions: tech stack, external providers, architecture |
+| `foundation/` | Scaffolding, project structure, development environment |
+| `governance/` | License, repository policies, contribution rules |
 
-| Purpose | Prompt | Use it to |
-|---------|--------|-----------|
-| Quality | [Create comprehensive CI checks](prompts/existing/quality/create-ci-pipeline.md) | Add a full CI pipeline (build, lint, test, security) to an existing repo. |
-| Quality | [Design a test strategy](prompts/existing/quality/design-test-strategy.md) | Decide test layers, tooling, and coverage goals for an existing codebase. |
-| Security | [Run a security audit](prompts/existing/security/run-security-audit.md) | Find and prioritize security risks in a built project. |
-| Security | [Audit dependencies](prompts/existing/security/audit-dependencies.md) | Review third-party packages for risk, staleness, and upgrades. |
-| Documentation | [Generate project documentation](prompts/existing/documentation/generate-project-docs.md) | Produce README, architecture, and onboarding docs from the code. |
-| Operations | [Set up observability](prompts/existing/operations/setup-observability.md) | Add logging, metrics, tracing, and alerting to a running app. |
-| Operations | [Run a performance audit](prompts/existing/operations/performance-audit.md) | Identify bottlenecks and prioritize performance fixes. |
-| Maintenance | [Assess technical debt](prompts/existing/maintenance/assess-tech-debt.md) | Inventory and rank tech debt into an actionable plan. |
+### Existing (`prompts/existing/`)
+
+| Folder | Use for |
+|--------|---------|
+| `quality/` | CI/CD, testing, linting, code quality |
+| `security/` | Security audits, dependency reviews, threat modeling |
+| `documentation/` | README, architecture docs, onboarding guides |
+| `operations/` | Observability, performance, deployment, monitoring |
+| `maintenance/` | Technical debt, refactoring, upgrades, cleanup |
+
+If a prompt does not fit an existing folder, propose a new one in the PR and explain why.
+Keep folder names lowercase and singular.
 
 ## Trust & safety
 

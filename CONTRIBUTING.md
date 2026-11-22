@@ -44,8 +44,8 @@ prompt must:
 
    | Field | Type | Example |
    |-------|------|---------|
-   | `id` | string | `choose-tech-stack` |
-   | `title` | string | `Choose the Best-Fit Tech Stack` |
+   | `id` | string | `your-prompt-id` |
+   | `title` | string | `Your Prompt Title` |
    | `phase` | `creation` or `existing` | `creation` |
    | `purpose` | string (folder name) | `strategy` |
    | `one_time` | boolean, always `true` | `true` |
@@ -63,7 +63,7 @@ prompt must:
 ## Naming
 
 Prompt filenames are lowercase kebab-case and describe the action:
-`create-ci-pipeline.md`, `audit-dependencies.md`, `choose-tech-stack.md`.
+`your-prompt-name.md`.
 
 ## Final checklist
 
@@ -73,7 +73,8 @@ Prompt filenames are lowercase kebab-case and describe the action:
 - [ ] **Guardrails** state whether the agent may modify files.
 - [ ] The prompt passes the injection scanner:
       `python3 scripts/scan-prompt-injection.py prompts/path/to/your-prompt.md`
-- [ ] The prompt is added to the index table in [README.md](README.md).
+- [ ] The prompt is listed in the [README.md](README.md) purpose folder table if it
+      introduces a new folder, or in the folder's index if one exists.
 - [ ] Markdown links resolve.
 
 See [CONTRIBUTING-SECURITY.md](CONTRIBUTING-SECURITY.md) and
