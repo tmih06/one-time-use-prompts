@@ -41,11 +41,11 @@ Every contribution goes through the following checks before merge:
 
 These run in CI on every pull request and must pass:
 
-| Scanner | What it catches |
-|---------|----------------|
-| `scripts/scan-prompt-injection.py` | Known injection patterns, encoding tricks, exfiltration endpoints, hidden instructions |
-| `gitleaks` | Hardcoded secrets, API keys, tokens in the prompt text |
-| `semgrep` (with `p/prompt-injection` ruleset) | Structural injection patterns across the markdown |
+| Scanner                                       | What it catches                                                                        |
+| --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `scripts/scan-prompt-injection.py`            | Known injection patterns, encoding tricks, exfiltration endpoints, hidden instructions |
+| `gitleaks`                                    | Hardcoded secrets, API keys, tokens in the prompt text                                 |
+| `semgrep` (with `p/prompt-injection` ruleset) | Structural injection patterns across the markdown                                      |
 
 A prompt that fails any scanner is rejected automatically. The contributor must fix the
 issue or justify the false positive in the PR.

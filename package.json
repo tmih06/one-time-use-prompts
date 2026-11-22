@@ -1,0 +1,27 @@
+{
+  "name": "one-time-use-prompts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A curated library of one-time-use prompts, organized by project lifecycle phase and purpose, with a searchable fumadocs site.",
+  "workspaces": [
+    "site"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "bun run sync && bun run --cwd site dev",
+    "build": "bun run sync && bun run --cwd site build",
+    "preview": "bun run --cwd site preview",
+    "deploy": "bun run build && bunx wrangler pages deploy",
+    "sync": "bun run scripts/sync-prompts.ts",
+    "lint": "vp lint --type-aware --type-check",
+    "fmt": "vp fmt",
+    "check": "vp check && vp lint --type-aware --type-check",
+    "typecheck": "tsc --noEmit && bun run --cwd site types:check"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.5",
+    "typescript": "^7.0.2",
+    "vite-plus": "^1.7.0",
+    "wrangler": "^4"
+  }
+}

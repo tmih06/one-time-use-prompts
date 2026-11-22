@@ -8,7 +8,7 @@ once. Before opening a PR, check that your prompt belongs in this repo at all.
 A prompt fits if it is:
 
 - **One-time:** run once at a particular point in a project's life, not every day.
-- **Phased:** clearly tied to either project *creation* or an *existing* project.
+- **Phased:** clearly tied to either project _creation_ or an _existing_ project.
 - **Purposeful:** solves one specific problem (a decision, an audit, a setup task).
 - **Self-contained:** works without the rest of a conversation as context.
 
@@ -60,16 +60,16 @@ Append an object to `prompts/catalog.json` under `prompts`:
 }
 ```
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `id` | yes | Kebab-case, must equal the filename without `.md` |
-| `title` | yes | Title case |
-| `phase` | yes | `creation` or `existing`, must match the folder |
-| `purpose` | yes | Folder name, must match the folder |
-| `one_time` | yes | Always `true` |
-| `tags` | yes | 2–5 lowercase strings |
-| `author` | no | Who wrote it. Omit entirely if unknown |
-| `source` | no | URL or list of URLs. Omit entirely if original |
+| Field      | Required | Notes                                             |
+| ---------- | -------- | ------------------------------------------------- |
+| `id`       | yes      | Kebab-case, must equal the filename without `.md` |
+| `title`    | yes      | Title case                                        |
+| `phase`    | yes      | `creation` or `existing`, must match the folder   |
+| `purpose`  | yes      | Folder name, must match the folder                |
+| `one_time` | yes      | Always `true`                                     |
+| `tags`     | yes      | 2–5 lowercase strings                             |
+| `author`   | no       | Who wrote it. Omit entirely if unknown            |
+| `source`   | no       | URL or list of URLs. Omit entirely if original    |
 
 The file path is derived as `prompts/<phase>/<purpose>/<id>.md`. Set `author` and
 `source` when a prompt came from elsewhere; if either is unknown, ask the contributor —

@@ -5,6 +5,28 @@ Thumbs.db
 .vscode/
 *.swp
 
+# Node / Bun
+node_modules/
+bun.lockb
+
+# Build output
+.output/
+dist/
+build/
+.cache/
+.tanstack/
+.source/
+.nitro/
+.vercel
+.nuxt
+
+# Generated site content (rebuilt by `bun run sync`)
+site/content/docs/*
+!site/content/docs/.gitkeep
+
+# Generated route tree
+site/src/routeTree.gen.ts
+
 # Local scratch / notes
 scratch/
 *.local.md

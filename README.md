@@ -8,16 +8,16 @@ one-shot "play" for a decision or a setup task that you should only have to do a
 time — choosing a tech stack before the first line of code, adding CI to an app that is
 already running, auditing dependencies once before a release, and so on.
 
-Think of this repo as a checklist of *run-this-once* plays, organized by **when** you run
+Think of this repo as a checklist of _run-this-once_ plays, organized by **when** you run
 them and **what they are for**.
 
 ## The two phases
 
 Prompts are split by project lifecycle first:
 
-| Phase | Directory | When to use |
-|-------|-----------|-------------|
-| **Creation** | [`prompts/creation/`](prompts/creation) | Greenfield. The project does not exist yet, or is a bare skeleton. Run these before or while scaffolding. |
+| Phase        | Directory                               | When to use                                                                                                |
+| ------------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Creation** | [`prompts/creation/`](prompts/creation) | Greenfield. The project does not exist yet, or is a bare skeleton. Run these before or while scaffolding.  |
 | **Existing** | [`prompts/existing/`](prompts/existing) | Brownfield. The project is already built and running. Run these to audit, harden, document, or improve it. |
 
 Inside each phase, prompts are grouped by **purpose** (strategy, quality, security, ...).
@@ -36,7 +36,7 @@ the prompt text**, so an agent that consumes one is not fed unrelated metadata. 
 5. Review the result. These prompts ask for a **written artifact** — a decision record, a
    config file, a plan — so treat the output as a draft to review and commit.
 
-> Most prompts are deliberately *read-only in intent*: they produce a recommendation or
+> Most prompts are deliberately _read-only in intent_: they produce a recommendation or
 > a file for you to approve. Check each prompt's **Guardrails** section before letting an
 > agent apply changes directly to a repository.
 
@@ -47,21 +47,21 @@ intent. The current folders are:
 
 ### Creation (`prompts/creation/`)
 
-| Folder | Use for |
-|--------|---------|
-| `strategy/` | High-level decisions: tech stack, external providers, architecture |
-| `foundation/` | Scaffolding, project structure, development environment |
-| `governance/` | License, repository policies, contribution rules |
+| Folder        | Use for                                                            |
+| ------------- | ------------------------------------------------------------------ |
+| `strategy/`   | High-level decisions: tech stack, external providers, architecture |
+| `foundation/` | Scaffolding, project structure, development environment            |
+| `governance/` | License, repository policies, contribution rules                   |
 
 ### Existing (`prompts/existing/`)
 
-| Folder | Use for |
-|--------|---------|
-| `quality/` | CI/CD, testing, linting, code quality |
-| `security/` | Security audits, dependency reviews, threat modeling |
-| `documentation/` | README, architecture docs, onboarding guides |
-| `operations/` | Observability, performance, deployment, monitoring |
-| `maintenance/` | Technical debt, refactoring, upgrades, cleanup |
+| Folder           | Use for                                              |
+| ---------------- | ---------------------------------------------------- |
+| `quality/`       | CI/CD, testing, linting, code quality                |
+| `security/`      | Security audits, dependency reviews, threat modeling |
+| `documentation/` | README, architecture docs, onboarding guides         |
+| `operations/`    | Observability, performance, deployment, monitoring   |
+| `maintenance/`   | Technical debt, refactoring, upgrades, cleanup       |
 
 If a prompt does not fit an existing folder, propose a new one in the PR and explain why.
 Keep folder names lowercase and singular.

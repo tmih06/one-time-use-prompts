@@ -1,0 +1,4 @@
+# oxfmt uses .gitignore + .prettierignore as ignore files.
+# Prompt source files are consumed verbatim by agents — keep author formatting.
+prompts/
+site/content/docs/

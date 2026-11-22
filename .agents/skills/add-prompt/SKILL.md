@@ -29,7 +29,7 @@ Help the user add a new prompt to this repo. A prompt is two parts:
   - `source` — the original URL, if the prompt is not original and none was given.
   - `phase` / `purpose` — if the classification is ambiguous.
   - `tags` — if none are obvious from the content.
-  Ask once, collect the answers, then write. Never fill optional fields with guesses.
+    Ask once, collect the answers, then write. Never fill optional fields with guesses.
 
 ### 2. Classify phase and purpose
 
@@ -98,6 +98,8 @@ frontmatter, placeholders in **Inputs** match those in **Instructions**.
 
 - If you created a new purpose folder, add it to the folder table in `README.md` and to
   `CONTRIBUTING.md`.
+- The new prompt appears on the docs site automatically — `bun run sync` regenerates
+  `site/content/docs/` from `prompts/` + `catalog.json` on every `dev`/`build`.
 - Commit with a conventional commit: `feat: add <id> prompt`.
 - If `source` was set, mention the origin in the PR description.
 
