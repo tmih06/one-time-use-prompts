@@ -14,7 +14,7 @@
  */
 
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dir, "..");
@@ -78,8 +78,12 @@ async function main(): Promise<void> {
   const errors: string[] = [];
 
   // Wipe and rebuild the generated tree (only the parts this script owns).
-  await rm(OUT_DIR, { recursive: true, force: true });
+  // Remove the contents, not OUT_DIR itself — deleting the directory detaches
+  // vite's file watcher and a running dev server keeps serving stale pages.
   await mkdir(OUT_DIR, { recursive: true });
+  for (const child of await readdir(OUT_DIR)) {
+    await rm(path.join(OUT_DIR, child), { recursive: true, force: true });
+  }
 
   // Group prompts by phase -> purpose for folder/index generation.
   const byPhase = new Map<string, Map<string, CatalogEntry[]>>();
