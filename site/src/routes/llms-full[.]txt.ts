@@ -1,12 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { docsLlms } from "@/lib/source";
+import { serveLlms } from "@/lib/serve-llms";
 
 export const Route = createFileRoute("/llms-full.txt")({
-  server: {
-    handlers: {
-      GET: async ({ request }) =>
-        (await docsLlms.serve(new URL(request.url).pathname)) ??
-        new Response(null, { status: 404 }),
-    },
-  },
+  server: { handlers: { GET: serveLlms } },
 });

@@ -1,7 +1,3 @@
-import { gitConfig } from "@/lib/shared";
-
-export const contributingUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/CONTRIBUTING.md`;
-
 /**
  * Body of the "Contribute yours!" sidebar link. It is registered as an
  * `icon` link item so Fumadocs renders it inside the footer box next to the

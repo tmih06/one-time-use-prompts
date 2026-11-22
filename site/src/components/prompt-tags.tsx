@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import type { CSSProperties } from "react";
 
 interface PromptTagsProps {
   phase?: string;
@@ -29,10 +30,12 @@ const hostOf = (url: string): string => {
  * and source links in neutral chips.
  */
 export function PromptTags({ phase, purpose, tags = [], author, source = [] }: PromptTagsProps) {
+  // `seed` picks the hue; tags seed on the bare name so they match the index cards.
   const colored = [
-    ...(phase ? [{ label: phase, strong: true }] : []),
-    ...(purpose ? [{ label: purpose, strong: true }] : []),
-    ...tags.map((label) => ({ label: `#${label}`, strong: false, key: label })),
+    ...[phase, purpose]
+      .filter((v): v is string => !!v)
+      .map((v) => ({ label: v, seed: v, strong: true })),
+    ...tags.map((t) => ({ label: `#${t}`, seed: t, strong: false })),
   ];
   if (colored.length === 0 && !author && source.length === 0) return null;
 
@@ -46,7 +49,7 @@ export function PromptTags({ phase, purpose, tags = [], author, source = [] }: P
           key={tag.label}
           className="tag"
           data-strong={tag.strong || undefined}
-          style={{ "--h": hue("key" in tag ? tag.key : tag.label) } as React.CSSProperties}
+          style={{ "--h": hue(tag.seed) } as CSSProperties}
         >
           {tag.label}
         </li>

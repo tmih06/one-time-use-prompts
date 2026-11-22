@@ -11,6 +11,9 @@ export const gitConfig = {
   branch: "master",
 };
 
+export const repoUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
+export const contributingUrl = `${repoUrl}/blob/${gitConfig.branch}/CONTRIBUTING.md`;
+
 const getImageUrl = createGetUrl(docsImageRoute);
 
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {

@@ -4,11 +4,11 @@ import { ArrowRight, Plus } from "lucide-react";
 import type { CSSProperties } from "react";
 import { hue } from "@/components/prompt-tags";
 import { baseOptions } from "@/lib/layout.shared";
-import { appName, gitConfig } from "@/lib/shared";
+import { appName, contributingUrl } from "@/lib/shared";
 import { source } from "@/lib/source";
 
 interface PromptSummary {
-  url: string;
+  splat: string;
   id: string;
   title: string;
   description: string;
@@ -32,8 +32,6 @@ const PHASES = [
   },
 ] as const;
 
-const contributingUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/CONTRIBUTING.md`;
-
 // Page metadata is already bundled with `source`, so this runs the same on the
 // server (prerender) and in the SPA shell — no static server-fn cache needed.
 function getPrompts(): PromptSummary[] {
@@ -41,7 +39,7 @@ function getPrompts(): PromptSummary[] {
     .getPages()
     .filter((page) => page.slugs.length === 3)
     .map((page) => ({
-      url: page.url,
+      splat: page.slugs.join("/"),
       id: page.slugs[2],
       title: page.data.title,
       description: page.data.description ?? "",
@@ -68,13 +66,14 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
+
 /** The layered "shell around an inset well" card recipe used across the site. */
 const shell = "rounded-[1.375rem] bg-surface p-1.5";
 const pill = "press inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium";
 
 function Home() {
   const prompts = Route.useLoaderData();
-  const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
 
   return (
     <HomeLayout {...baseOptions()}>
@@ -170,9 +169,9 @@ function Home() {
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {prompts.map((p) => (
               <Link
-                key={p.url}
+                key={p.splat}
                 to="/docs/$"
-                params={{ _splat: p.url.replace(/^\/docs\/?/, "") }}
+                params={{ _splat: p.splat }}
                 className={`press group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
               >
                 {/* inset "preview" well: the top of the prompt file, plus its tags */}

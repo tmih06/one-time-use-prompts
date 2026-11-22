@@ -4,9 +4,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { docs, source } from "@/lib/source";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { baseOptions } from "@/lib/layout.shared";
-import { getPageImageUrl, gitConfig } from "@/lib/shared";
+import { contributingUrl, getPageImageUrl, gitConfig, repoUrl } from "@/lib/shared";
 import { PromptActions } from "@/components/prompt-actions";
-import { ContributeLabel, contributingUrl } from "@/components/contribute-link";
+import { ContributeLabel } from "@/components/contribute-link";
 import { PromptTags } from "@/components/prompt-tags";
 import { staticFunctionMiddleware } from "@tanstack/start-static-server-functions";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
@@ -49,8 +49,9 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
 
   const { toc } = use(page.load());
   const MDX = page.body;
+  const mdxComponents = useMDXComponents();
 
-  const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`;
+  const githubUrl = `${repoUrl}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`;
 
   return (
     <DocsPage
@@ -72,7 +73,7 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
       />
       <DocsDescription>{page.description}</DocsDescription>
       <DocsBody>
-        <MDX components={useMDXComponents()} />
+        <MDX components={mdxComponents} />
       </DocsBody>
     </DocsPage>
   );

@@ -13,7 +13,6 @@
  * Usage: bun run scripts/sync-prompts.ts
  */
 
-import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -85,9 +84,23 @@ async function main(): Promise<void> {
     await rm(path.join(OUT_DIR, child), { recursive: true, force: true });
   }
 
+  // Read every prompt once (in parallel); both the page and the index use it.
+  const bodies = new Map<string, string>();
+  await Promise.all(
+    entries.map(async (entry) => {
+      const srcPath = path.join(PROMPTS_DIR, entry.phase, entry.purpose, `${entry.id}.md`);
+      try {
+        bodies.set(entry.id, await readFile(srcPath, "utf-8"));
+      } catch {
+        errors.push(`missing prompt file for catalog entry '${entry.id}': ${srcPath}`);
+      }
+    }),
+  );
+
   // Group prompts by phase -> purpose for folder/index generation.
   const byPhase = new Map<string, Map<string, CatalogEntry[]>>();
   for (const entry of entries) {
+    if (!bodies.has(entry.id)) continue;
     if (!byPhase.has(entry.phase)) byPhase.set(entry.phase, new Map());
     const purposes = byPhase.get(entry.phase)!;
     if (!purposes.has(entry.purpose)) purposes.set(entry.purpose, []);
@@ -95,46 +108,44 @@ async function main(): Promise<void> {
   }
 
   // --- Per-prompt pages -------------------------------------------------
-  for (const entry of entries) {
-    const srcPath = path.join(PROMPTS_DIR, entry.phase, entry.purpose, `${entry.id}.md`);
-    if (!existsSync(srcPath)) {
-      errors.push(`missing prompt file for catalog entry '${entry.id}': ${srcPath}`);
-      continue;
-    }
-    const body = await readFile(srcPath, "utf-8");
-    const description = extractWhenToUse(body) ?? `${entry.phase} / ${entry.purpose}`;
+  const pageWrites = [...byPhase.values()]
+    .flatMap((purposes) => [...purposes.values()].flat())
+    .map(async (entry) => {
+      const body = bodies.get(entry.id)!;
+      const description = extractWhenToUse(body) ?? `${entry.phase} / ${entry.purpose}`;
 
-    // Show the raw prompt inside a fenced code block — readers copy it, not
-    // read it rendered. The fence must be longer than any backtick run in
-    // the prompt so embedded code blocks stay inside.
-    const prompt = body.trim();
-    const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
-    const fence = "`".repeat(maxRun);
-    const promptBlock = `${fence}markdown title="${entry.id}.md" lineNumbers\n${prompt}\n${fence}`;
+      // Show the raw prompt inside a fenced code block — readers copy it, not
+      // read it rendered. The fence must be longer than any backtick run in
+      // the prompt so embedded code blocks stay inside.
+      const prompt = body.trim();
+      const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
+      const fence = "`".repeat(maxRun);
+      const promptBlock = `${fence}markdown title="${entry.id}.md" lineNumbers\n${prompt}\n${fence}`;
 
-    const mdx = [
-      "---",
-      `title: ${yaml(entry.title)}`,
-      `description: ${yaml(description)}`,
-      `phase: ${yaml(entry.phase)}`,
-      `purpose: ${yaml(entry.purpose)}`,
-      `tags: ${JSON.stringify(entry.tags)}`,
-      ...(entry.author ? [`author: ${yaml(entry.author)}`] : []),
-      ...(entry.source === undefined
-        ? []
-        : [
-            `source: ${JSON.stringify(Array.isArray(entry.source) ? entry.source : [entry.source])}`,
-          ]),
-      "---",
-      "",
-      promptBlock,
-      "",
-    ].join("\n");
+      const mdx = [
+        "---",
+        `title: ${yaml(entry.title)}`,
+        `description: ${yaml(description)}`,
+        `phase: ${yaml(entry.phase)}`,
+        `purpose: ${yaml(entry.purpose)}`,
+        `tags: ${JSON.stringify(entry.tags)}`,
+        ...(entry.author ? [`author: ${yaml(entry.author)}`] : []),
+        ...(entry.source === undefined
+          ? []
+          : [
+              `source: ${JSON.stringify(Array.isArray(entry.source) ? entry.source : [entry.source])}`,
+            ]),
+        "---",
+        "",
+        promptBlock,
+        "",
+      ].join("\n");
 
-    const destDir = path.join(OUT_DIR, entry.phase, entry.purpose);
-    await mkdir(destDir, { recursive: true });
-    await writeFile(path.join(destDir, `${entry.id}.md`), mdx);
-  }
+      const destDir = path.join(OUT_DIR, entry.phase, entry.purpose);
+      await mkdir(destDir, { recursive: true });
+      await writeFile(path.join(destDir, `${entry.id}.md`), mdx);
+    });
+  await Promise.all(pageWrites);
 
   // --- Folder metadata ---------------------------------------------------
   await writeFile(
@@ -206,11 +217,7 @@ async function main(): Promise<void> {
     )) {
       lines.push(`## ${PURPOSE_TITLES[purpose] ?? purpose}`, "");
       for (const item of items.sort((a, b) => a.title.localeCompare(b.title))) {
-        const src = await readFile(
-          path.join(PROMPTS_DIR, phase, purpose, `${item.id}.md`),
-          "utf-8",
-        );
-        const desc = extractWhenToUse(src) ?? "";
+        const desc = extractWhenToUse(bodies.get(item.id)!) ?? "";
         lines.push(`- **[${item.title}](/docs/${phase}/${purpose}/${item.id})** — ${desc}`);
       }
       lines.push("");

@@ -1,9 +1,9 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import * as React from "react";
 import appCss from "@/styles/app.css?url";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import SearchDialog from "@/components/search";
 import { DevTools } from "@/components/dev-tools";
+import { appName } from "@/lib/shared";
 import { SmoothScroll } from "@/components/smooth-scroll";
 
 export const Route = createRootRoute({
@@ -17,7 +17,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "One-Time-Use Prompts",
+        title: appName,
       },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -36,7 +36,7 @@ function RootComponent() {
           <Outlet />
         </RootProvider>
         <SmoothScroll />
-        <DevTools />
+        {import.meta.env.DEV && <DevTools />}
         <Scripts />
       </body>
     </html>

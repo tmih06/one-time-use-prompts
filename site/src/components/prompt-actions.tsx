@@ -33,6 +33,12 @@ export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
   const pageUrl = typeof window === "undefined" ? pathname : window.location.href;
   const q = `Read ${pageUrl}, I want to ask questions about it.`;
 
+  const ai = (title: string, base: string, params: Record<string, string>): ActionLink => ({
+    title,
+    href: `${base}?${new URLSearchParams(params)}`,
+    icon: <Sparkles />,
+  });
+
   const groups: ActionGroup[] = [
     {
       label: "Source",
@@ -44,26 +50,10 @@ export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
     {
       label: "Run in",
       links: [
-        {
-          title: "Claude",
-          href: `https://claude.ai/new?${new URLSearchParams({ q })}`,
-          icon: <Sparkles />,
-        },
-        {
-          title: "ChatGPT",
-          href: `https://chatgpt.com/?${new URLSearchParams({ prompt: q, hints: "search" })}`,
-          icon: <Sparkles />,
-        },
-        {
-          title: "Scira",
-          href: `https://scira.ai/?${new URLSearchParams({ q })}`,
-          icon: <Sparkles />,
-        },
-        {
-          title: "Cursor",
-          href: `https://cursor.com/link/prompt?${new URLSearchParams({ text: q })}`,
-          icon: <Sparkles />,
-        },
+        ai("Claude", "https://claude.ai/new", { q }),
+        ai("ChatGPT", "https://chatgpt.com/", { prompt: q, hints: "search" }),
+        ai("Scira", "https://scira.ai/", { q }),
+        ai("Cursor", "https://cursor.com/link/prompt", { text: q }),
       ],
     },
   ];

@@ -21,7 +21,6 @@
     "@tanstack/react-router-devtools": "1.167.3",
     "@tanstack/react-start": "1.169.5",
     "@tanstack/start-static-server-functions": "1.167.44",
-    "cn": "^0.5.2",
     "fumadocs-core": "16.19.6",
     "fumadocs-mdx": "15.6.4",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.19.6",
