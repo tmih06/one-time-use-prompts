@@ -73,6 +73,17 @@
         "https://x.com/DanKornas/status/2122795905602740651",
         "https://github.com/umutxyp/Seo-Promt-Master"
       ]
+    },
+    {
+      "id": "audit-authorization-data-isolation",
+      "title": "Audit Authorization and Data Isolation",
+      "description": "Once per application, before giving real customers access — audit the codebase for broken access controls, privilege escalation and cross-tenant data exposure that a login system alone does not prevent.",
+      "phase": "existing",
+      "purpose": "security",
+      "one_time": true,
+      "tags": ["security", "authorization", "multi-tenant", "rbac", "audit"],
+      "author": "Sujay (@Sujay__Raj)",
+      "source": "https://x.com/Sujay__Raj/status/2124829566107820085"
     }
   ]
 }
