@@ -1,58 +1,9 @@
 import { ArrowRight, Plus } from "lucide-react";
-import type { CSSProperties } from "react";
-import { hue } from "@/components/prompt-tags";
+import { PromptCard, shell } from "@/components/prompt-card";
 import { HomeShell } from "@/components/site-provider";
+import { count, PHASES, type PromptSummary } from "@/lib/prompts";
 import { contributingUrl } from "@/lib/shared";
-import { source } from "@/lib/source";
 
-interface PromptSummary {
-  splat: string;
-  id: string;
-  title: string;
-  description: string;
-  phase: string;
-  purpose: string;
-  tags: string[];
-  preview: string[];
-}
-
-const PHASES = [
-  {
-    slug: "creation",
-    title: "Creation",
-    kicker: "Greenfield",
-    blurb: "Starting from scratch — set the strategy, foundation and governance of a new project.",
-  },
-  {
-    slug: "existing",
-    title: "Existing",
-    kicker: "Brownfield",
-    blurb: "Working on a live codebase — quality, security, docs, operations and maintenance.",
-  },
-] as const;
-
-// Page metadata (including the preview lines) is bundled with `source` at build time.
-export function getPrompts(): PromptSummary[] {
-  return source
-    .getPages()
-    .filter((page) => page.slugs.length === 3)
-    .map((page) => ({
-      splat: page.slugs.join("/"),
-      id: page.slugs[2],
-      title: page.data.title,
-      description: page.data.description ?? "",
-      phase: page.slugs[0],
-      purpose: page.slugs[1],
-      tags: page.data.tags ?? [],
-      preview: page.data.preview ?? [],
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title));
-}
-
-const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
-
-/** The layered "shell around an inset well" card recipe used across the site. */
-const shell = "rounded-[1.375rem] bg-surface p-1.5";
 const pill = "press inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium";
 
 export function Home({ prompts }: { prompts: PromptSummary[] }) {
@@ -147,58 +98,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
           </div>
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {prompts.map((p) => (
-              <a
-                key={p.splat}
-                href={`/docs/${p.splat}`}
-                className={`press group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
-              >
-                {/* inset "preview" well: the top of the prompt file, fading out at the bottom */}
-                <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">
-                  {p.preview.map((line, i) => (
-                    <span
-                      key={i}
-                      className={
-                        line.startsWith("#")
-                          ? "text-brand"
-                          : line.startsWith(">")
-                            ? "text-muted-foreground"
-                            : "text-foreground/80"
-                      }
-                    >
-                      {line || "\u00a0"}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-col gap-1 px-3 pb-2.5 pt-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="flex min-w-0 items-center gap-2 font-medium">
-                      <span className="truncate">{p.title}</span>
-                    </h3>
-                  </div>
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
-                  {p.tags.length > 0 && (
-                    <ul className="mt-2 flex flex-wrap gap-1" aria-label="Tags">
-                      {p.tags.slice(0, 5).map((t) => (
-                        <li
-                          key={t}
-                          className="tag !h-5 !px-2 !text-[0.6875rem]"
-                          style={{ "--h": hue(t) } as CSSProperties}
-                        >
-                          #{t}
-                        </li>
-                      ))}
-                      {p.tags.length > 5 && (
-                        <li className="tag tag-neutral !h-5 !px-2 !text-[0.6875rem]">
-                          +{p.tags.length - 5}
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                  <p className="mt-2 text-[0.8125rem] capitalize text-muted-foreground/80">
-                    {p.phase} · {p.purpose}
-                  </p>
-                </div>
-              </a>
+              <PromptCard key={p.splat} prompt={p} />
             ))}
           </div>
         </section>

@@ -1,31 +1,64 @@
 ---
-import { DocsView } from "@/components/docs-view";
+import { Gallery } from "@/components/gallery";
+import { PromptPage } from "@/components/prompt-page";
 import Base from "@/layouts/base.astro";
+import { getPrompts } from "@/lib/prompts";
 import { getPageImageUrl } from "@/lib/shared";
 import { docs, source } from "@/lib/source";
 import { fetchTweets } from "@/lib/tweet";
 
+/**
+ * Prompt pages (/docs/<phase>/<purpose>/<id>) show a single prompt. Every
+ * shallower level — the library, a phase, a purpose — is a browse page and
+ * renders as a gallery. Purposes have no source page, so their paths are added here.
+ */
 export function getStaticPaths() {
-  return source.getPages().map((page) => ({
+  const pages = source.getPages().map((page) => ({
     params: { slug: page.slugs.join("/") || undefined },
     props: { slugs: page.slugs },
   }));
+  const purposes = [...new Set(getPrompts().map((p) => `${p.phase}/${p.purpose}`))].map((slug) => ({
+    params: { slug },
+    props: { slugs: slug.split("/") },
+  }));
+  return [...pages, ...purposes];
 }
 
-const page = source.getPage(Astro.props.slugs)!;
-const doc = docs.getPage(page.path)!;
-await doc.preload();
-const { toc } = await doc.load();
-const tweets = await fetchTweets(doc.source);
+const { slugs } = Astro.props;
+const isGallery = slugs.length < 3;
+const page = source.getPage(slugs);
+
+const doc = !isGallery && page ? docs.getPage(page.path)! : undefined;
+if (doc) await doc.preload();
+const tweets = doc ? await fetchTweets(doc.source) : [];
+
+// Suggest the prompts closest to this one: same purpose first, then same phase.
+const here = getPrompts().find((p) => p.splat === slugs.join("/"));
+const rank = (p: { phase: string; purpose: string }) =>
+  (p.phase === here?.phase ? 1 : 0) + (p.purpose === here?.purpose ? 1 : 0);
+const related = getPrompts()
+  .filter((p) => p.splat !== here?.splat)
+  .sort((a, b) => rank(b) - rank(a))
+  .slice(0, 3);
 ---
 
-<Base ogImage={getPageImageUrl(page).url}>
-  <DocsView
-    path={page.path}
-    pathname={page.url}
-    markdownUrl={`${page.url}.md`}
-    toc={toc}
-    tree={source.getPageTree()}
-    tweets={tweets}
-  />
-</Base>
+{
+  isGallery ? (
+    <Base
+      description="A curated library of focused prompts that run exactly once — at project creation or on an existing codebase."
+      ogImage={page ? getPageImageUrl(page).url : undefined}
+    >
+      <Gallery prompts={getPrompts()} phase={slugs[0]} purpose={slugs[1]} />
+    </Base>
+  ) : (
+    <Base ogImage={getPageImageUrl(page!).url}>
+      <PromptPage
+        path={page!.path}
+        pathname={page!.url}
+        markdownUrl={`${page!.url}.md`}
+        tweets={tweets}
+        related={related}
+      />
+    </Base>
+  )
+}

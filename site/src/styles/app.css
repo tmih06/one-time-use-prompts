@@ -78,12 +78,6 @@
   --color-fd-ring: color-mix(in oklab, var(--brand) 60%, transparent);
 }
 
-.dark #nd-sidebar {
-  --color-fd-muted: var(--surface);
-  --color-fd-secondary: var(--surface);
-  --color-fd-muted-foreground: var(--muted-foreground);
-}
-
 html {
   scrollbar-gutter: stable;
 }
@@ -115,38 +109,14 @@ body {
   border-bottom-color: transparent;
 }
 
-/* Headings: tight tracking, semibold. */
-#nd-page h1 {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-}
-
 .prose :is(h2, h3) {
   letter-spacing: -0.02em;
   font-weight: 600;
 }
 
-/* Wordmark (tighter inside the narrow sidebar so it stays on one line) */
+/* Wordmark */
 .font-logo {
   letter-spacing: 0.08em;
-}
-
-#nd-sidebar .font-logo {
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-/* "Contribute yours!" sits in the sidebar footer box, filling the gap between
-   the GitHub icon and the theme toggle. */
-#nd-sidebar a[aria-label="Contribute yours!"] {
-  flex: 1 1 auto;
-  justify-content: flex-start;
-  min-width: 0;
-  padding-inline: 0.5rem 0.25rem;
-  border-radius: 999px;
 }
 
 /* Press feedback on anything marked interactive, like Tuff's active:scale. */
@@ -158,35 +128,6 @@ body {
 }
 .press:active {
   scale: 0.97;
-}
-
-/* Sidebar: no outline on the rail; active page is a soft pill, no side line. */
-#nd-sidebar {
-  background: var(--background);
-}
-
-#nd-sidebar a[data-active="true"] {
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
-  color: var(--foreground);
-  font-weight: 500;
-  border-radius: 1rem;
-}
-
-#nd-sidebar a[data-active="true"]::before {
-  display: none;
-}
-
-/*
- * Docs layout: the grid reserves a `1fr` gutter on the left so the main
- * column stays centered at `--fd-layout-width`. `#nd-sidebar` is
- * `position:absolute; inset:0` inside its sticky placeholder, so it stretches
- * across that gutter too and its content aligns to the far edge — leaving a
- * wide empty strip on the left. Pin the sidebar to its own column so it hugs
- * the left edge and the gutter disappears.
- */
-#nd-docs-layout > [data-sidebar-placeholder] > #nd-sidebar {
-  inset-inline-end: auto;
-  width: var(--fd-sidebar-width);
 }
 
 /*

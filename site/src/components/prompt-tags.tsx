@@ -7,6 +7,7 @@ interface PromptTagsProps {
   tags?: string[];
   author?: string;
   source?: string[];
+  className?: string;
 }
 
 /** Stable 0–359 hue per string, so a given tag is always the same colour. */
@@ -29,7 +30,14 @@ const hostOf = (url: string): string => {
  * the page title: phase + purpose first (stronger), then tags, then author
  * and source links in neutral chips.
  */
-export function PromptTags({ phase, purpose, tags = [], author, source = [] }: PromptTagsProps) {
+export function PromptTags({
+  phase,
+  purpose,
+  tags = [],
+  author,
+  source = [],
+  className = "-mt-1 mb-5",
+}: PromptTagsProps) {
   // `seed` picks the hue; tags seed on the bare name so they match the index cards.
   const colored = [
     ...[phase, purpose]
@@ -41,7 +49,7 @@ export function PromptTags({ phase, purpose, tags = [], author, source = [] }: P
 
   return (
     <ul
-      className="not-prose -mt-1 mb-5 flex flex-wrap items-center gap-1.5"
+      className={`not-prose flex flex-wrap items-center gap-1.5 ${className}`}
       aria-label="Prompt tags"
     >
       {colored.map((tag) => (
