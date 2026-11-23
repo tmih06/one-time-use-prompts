@@ -1,7 +1,7 @@
 # site
 
-This is a Tanstack Start application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+This is a static [Astro](https://astro.build) site that renders
+[Fumadocs](https://github.com/fuma-nama/fumadocs) UI at build time.
 
 Run development server:
 

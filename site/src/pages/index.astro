@@ -1,0 +1,12 @@
+---
+import { getPrompts, Home } from "@/components/home";
+import Base from "@/layouts/base.astro";
+import { appName } from "@/lib/shared";
+
+const description =
+  "A curated library of focused prompts that run exactly once — at project creation or on an existing codebase.";
+---
+
+<Base description={description} ogTitle={appName} ogType="website">
+  <Home prompts={getPrompts()} />
+</Base>

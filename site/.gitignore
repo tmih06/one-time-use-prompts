@@ -3,8 +3,8 @@ node_modules
 .DS_Store
 .cache
 .vercel
-.output
-.nitro
+dist
+.astro
 /build/
 /api/
 /server/build
@@ -13,7 +13,6 @@ node_modules
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-.tanstack
 
 .source
 # generated prompt library (rebuilt by `bun run sync`)

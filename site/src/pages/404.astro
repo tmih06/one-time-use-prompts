@@ -1,0 +1,11 @@
+---
+import { DefaultNotFound } from "fumadocs-ui/layouts/home/not-found";
+import { HomeShell } from "@/components/site-provider";
+import Base from "@/layouts/base.astro";
+---
+
+<Base>
+  <HomeShell pathname={Astro.url.pathname}>
+    <DefaultNotFound />
+  </HomeShell>
+</Base>

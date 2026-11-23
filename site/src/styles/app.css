@@ -331,3 +331,17 @@ figure.shiki pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Static equivalents of styles Base UI and the theme switch applied from JS. */
+.base-ui-disable-scrollbar {
+  scrollbar-width: none;
+}
+.base-ui-disable-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.dark [data-theme-toggle] .lucide-moon,
+.light [data-theme-toggle] .lucide-sun {
+  background-color: var(--color-fd-accent);
+  color: var(--color-fd-accent-foreground);
+}

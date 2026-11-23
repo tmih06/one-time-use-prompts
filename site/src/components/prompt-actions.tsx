@@ -1,4 +1,3 @@
-"use client";
 import { usePathname } from "fumadocs-core/framework";
 import { ArrowUpRight, FileText, GitBranch, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
@@ -12,6 +11,8 @@ interface ActionLink {
   title: string;
   href: string;
   icon: ReactNode;
+  /** Query param holding the question; scripts/site.ts fills in the absolute page URL. */
+  ask?: string;
 }
 
 interface ActionGroup {
@@ -30,11 +31,16 @@ const withBasePath = (href: string): string =>
  */
 export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
   const pathname = usePathname();
-  const pageUrl = typeof window === "undefined" ? pathname : window.location.href;
-  const q = `Read ${pageUrl}, I want to ask questions about it.`;
+  const q = `Read ${pathname}, I want to ask questions about it.`;
 
-  const ai = (title: string, base: string, params: Record<string, string>): ActionLink => ({
+  const ai = (
+    title: string,
+    base: string,
+    ask: string,
+    params: Record<string, string>,
+  ): ActionLink => ({
     title,
+    ask,
     href: `${base}?${new URLSearchParams(params)}`,
     icon: <Sparkles />,
   });
@@ -50,10 +56,10 @@ export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
     {
       label: "Run in",
       links: [
-        ai("Claude", "https://claude.ai/new", { q }),
-        ai("ChatGPT", "https://chatgpt.com/", { prompt: q, hints: "search" }),
-        ai("Scira", "https://scira.ai/", { q }),
-        ai("Cursor", "https://cursor.com/link/prompt", { text: q }),
+        ai("Claude", "https://claude.ai/new", "q", { q }),
+        ai("ChatGPT", "https://chatgpt.com/", "prompt", { prompt: q, hints: "search" }),
+        ai("Scira", "https://scira.ai/", "q", { q }),
+        ai("Cursor", "https://cursor.com/link/prompt", "text", { text: q }),
       ],
     },
   ];
@@ -75,6 +81,7 @@ export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
                   <li key={link.href}>
                     <a
                       href={link.href}
+                      data-ask={link.ask}
                       target="_blank"
                       rel="noreferrer"
                       className="press group flex h-9 items-center gap-2.5 rounded-full px-3 text-foreground/90 hover:bg-foreground/[0.06] hover:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
