@@ -52,6 +52,7 @@ const PURPOSE_TITLES: Record<string, string> = {
   documentation: "Documentation",
   operations: "Operations",
   maintenance: "Maintenance",
+  polish: "Polish",
 };
 
 const yaml = (v: string): string => JSON.stringify(v);

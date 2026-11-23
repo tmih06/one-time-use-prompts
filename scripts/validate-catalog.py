@@ -36,6 +36,7 @@ VALID_PURPOSES = {
     "documentation",
     "operations",
     "maintenance",
+    "polish",
 }
 REQUIRED_FIELDS = ["id", "title", "description", "phase", "purpose", "one_time", "tags"]
 

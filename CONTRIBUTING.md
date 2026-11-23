@@ -29,7 +29,8 @@ prompts/
     ├── security/   # audits, dependencies, secrets, threat models
     ├── documentation/
     ├── operations/ # observability, performance, deployment
-    └── maintenance/# tech debt, refactoring, upgrades
+    ├── maintenance/# tech debt, refactoring, upgrades
+    └── polish/     # fit-and-finish UI passes: visuals, copy, states, a11y
 ```
 
 If your prompt does not fit an existing purpose folder, propose a new one in the PR and
