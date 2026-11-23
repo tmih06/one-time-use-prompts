@@ -20,7 +20,9 @@ function init(root: HTMLElement) {
   const items = [...grid.querySelectorAll<HTMLElement>("[data-gallery-item]")];
   const navs = [...root.querySelectorAll<HTMLElement>("[data-filter-nav]")];
   const known = new Set(
-    [...root.querySelectorAll<HTMLElement>('[data-slot="title"] > [data-variant]')].map((v) => v.dataset.variant!),
+    [...root.querySelectorAll<HTMLElement>('[data-slot="title"] > [data-variant]')].map(
+      (v) => v.dataset.variant!,
+    ),
   );
 
   const parse = (key: string) => {
@@ -63,10 +65,7 @@ function init(root: HTMLElement) {
     next?.setAttribute("data-active", "");
     const to = read();
     if (!animate || reducedMotion || from === to) return;
-    slot.animate(
-      { [axis]: [from + "px", to + "px"] },
-      { duration: 520, easing: EASE_TRAVEL },
-    );
+    slot.animate({ [axis]: [from + "px", to + "px"] }, { duration: 520, easing: EASE_TRAVEL });
   }
 
   const slot = (name: string) => root.querySelector<HTMLElement>('[data-slot="' + name + '"]')!;
@@ -97,12 +96,14 @@ function init(root: HTMLElement) {
     morph(purposes, phase && has ? phase : null, animate);
     if (entering && animate && !reducedMotion) {
       // The new row's pills settle in one after another.
-      has!.querySelectorAll<HTMLElement>("a").forEach((pill, i) =>
-        pill.animate(
-          { opacity: [0, 1], transform: ["translateY(8px) scale(0.94)", "none"] },
-          { duration: 420, delay: 120 + i * 45, easing: EASE_ARRIVE, fill: "backwards" },
-        ),
-      );
+      has!
+        .querySelectorAll<HTMLElement>("a")
+        .forEach((pill, i) =>
+          pill.animate(
+            { opacity: [0, 1], transform: ["translateY(8px) scale(0.94)", "none"] },
+            { duration: 420, delay: 120 + i * 45, easing: EASE_ARRIVE, fill: "backwards" },
+          ),
+        );
     }
   }
 
@@ -235,7 +236,12 @@ function init(root: HTMLElement) {
     entering.forEach((el, i) => {
       el.animate(
         { opacity: [0, 1], transform: ["translateY(16px) scale(0.96)", "none"] },
-        { duration: 480, delay: 140 + Math.min(i * 50, 350), easing: EASE_ARRIVE, fill: "backwards" },
+        {
+          duration: 480,
+          delay: 140 + Math.min(i * 50, 350),
+          easing: EASE_ARRIVE,
+          fill: "backwards",
+        },
       );
     });
 

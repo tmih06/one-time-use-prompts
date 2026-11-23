@@ -12,26 +12,26 @@ already lazy and are shipped verbatim.
 
 ### Per font file (site/dist)
 
-| Before (dist/_astro) | Size | After (dist/fonts) | Size |
-|---|---:|---|---:|
-| geist-latin-wght-normal | 29,400 | geist-core + geist-ext + geist-exta | 14,792 + 8,904 + 8,328 |
-| geist-mono-latin-wght-normal | 23,128 | geist-mono-core + -ext + -exta | 10,188 + 7,516 + 6,688 |
-| orbitron-latin-wght-normal | 11,800 | orbitron-core + orbitron-ext | 4,892 + 2,644 |
-| geist-cyrillic | 15,084 | geist-cyrillic | 15,084 (verbatim) |
-| geist-cyrillic-ext | 7,420 | geist-cyrillic-ext | 7,420 (verbatim) |
-| geist-vietnamese | 8,004 | geist-vietnamese | 8,004 (verbatim) |
-| geist-mono-latin-ext | 14,696 | (folded into geist-mono-exta) | — |
-| geist-latin-ext | 16,512 | (folded into geist-exta) | — |
-| geist-mono-cyrillic | 12,940 | geist-mono-cyrillic | 12,940 (verbatim) |
-| geist-mono-cyrillic-ext | 6,176 | geist-mono-cyrillic-ext | 6,176 (verbatim) |
-| geist-mono-vietnamese | 7,696 | geist-mono-vietnamese | 7,696 (verbatim) |
-| geist-mono-symbols2 | 5,812 | geist-mono-symbols2 | 5,812 (verbatim) |
-| **Total in dist** | **158,668** | | **127,084** |
+| Before (dist/_astro)         |        Size | After (dist/fonts)                  |                   Size |
+| ---------------------------- | ----------: | ----------------------------------- | ---------------------: |
+| geist-latin-wght-normal      |      29,400 | geist-core + geist-ext + geist-exta | 14,792 + 8,904 + 8,328 |
+| geist-mono-latin-wght-normal |      23,128 | geist-mono-core + -ext + -exta      | 10,188 + 7,516 + 6,688 |
+| orbitron-latin-wght-normal   |      11,800 | orbitron-core + orbitron-ext        |          4,892 + 2,644 |
+| geist-cyrillic               |      15,084 | geist-cyrillic                      |      15,084 (verbatim) |
+| geist-cyrillic-ext           |       7,420 | geist-cyrillic-ext                  |       7,420 (verbatim) |
+| geist-vietnamese             |       8,004 | geist-vietnamese                    |       8,004 (verbatim) |
+| geist-mono-latin-ext         |      14,696 | (folded into geist-mono-exta)       |                      — |
+| geist-latin-ext              |      16,512 | (folded into geist-exta)            |                      — |
+| geist-mono-cyrillic          |      12,940 | geist-mono-cyrillic                 |      12,940 (verbatim) |
+| geist-mono-cyrillic-ext      |       6,176 | geist-mono-cyrillic-ext             |       6,176 (verbatim) |
+| geist-mono-vietnamese        |       7,696 | geist-mono-vietnamese               |       7,696 (verbatim) |
+| geist-mono-symbols2          |       5,812 | geist-mono-symbols2                 |       5,812 (verbatim) |
+| **Total in dist**            | **158,668** |                                     |            **127,084** |
 
 ### Per page (downloaded on load)
 
-| Page | Before | After | Δ |
-|---|---:|---:|---:|
+| Page         | Before |  After |                Δ |
+| ------------ | -----: | -----: | ---------------: |
 | All 11 pages | 64,328 | 29,872 | −34,456 (−53.6%) |
 
 Breakdown per page: geist-core 14,792 + geist-mono-core 10,188 + orbitron-core
@@ -70,19 +70,19 @@ scale, `prefers-reduced-motion: reduce`, external requests (unavatar etc.)
 aborted for determinism. Same-build screenshots are byte-identical under this
 setup, so every reported diff is attributable to the change.
 
-| Page | Differing px | px with delta > 30 | Verdict |
-|---|---:|---:|---|
-| /index.html | 7,623 | 509 | sub-pixel rounding |
-| /prompts.html | 4,462 | 304 | sub-pixel rounding |
-| /prompts/existing.html | 5,231 | 380 | sub-pixel rounding |
-| /prompts/existing/maintenance.html | 3,179 | 259 | sub-pixel rounding |
-| /prompts/existing/maintenance/untangle-codebase.html | 6,728 | 495 | sub-pixel rounding |
-| /prompts/existing/operations.html | 3,281 | 255 | sub-pixel rounding |
-| /prompts/existing/operations/optimize-web-font-loading.html | 15,963 | 7,107 | sub-pixel rounding |
-| /prompts/existing/quality.html | 3,008 | 264 | sub-pixel rounding |
-| /prompts/existing/quality/optimize-ci-speed.html | 14,906 | 7,019 | sub-pixel rounding |
-| /prompts/existing/quality/setup-go-quality-gate.html | 11,182 | 804 | sub-pixel rounding |
-| /404.html | 1,628 | 57 | sub-pixel rounding |
+| Page                                                        | Differing px | px with delta > 30 | Verdict            |
+| ----------------------------------------------------------- | -----------: | -----------------: | ------------------ |
+| /index.html                                                 |        7,623 |                509 | sub-pixel rounding |
+| /prompts.html                                               |        4,462 |                304 | sub-pixel rounding |
+| /prompts/existing.html                                      |        5,231 |                380 | sub-pixel rounding |
+| /prompts/existing/maintenance.html                          |        3,179 |                259 | sub-pixel rounding |
+| /prompts/existing/maintenance/untangle-codebase.html        |        6,728 |                495 | sub-pixel rounding |
+| /prompts/existing/operations.html                           |        3,281 |                255 | sub-pixel rounding |
+| /prompts/existing/operations/optimize-web-font-loading.html |       15,963 |              7,107 | sub-pixel rounding |
+| /prompts/existing/quality.html                              |        3,008 |                264 | sub-pixel rounding |
+| /prompts/existing/quality/optimize-ci-speed.html            |       14,906 |              7,019 | sub-pixel rounding |
+| /prompts/existing/quality/setup-go-quality-gate.html        |       11,182 |                804 | sub-pixel rounding |
+| /404.html                                                   |        1,628 |                 57 | sub-pixel rounding |
 
 **Explanation of every visible difference: harmless sub-pixel rounding.**
 Amplified diffs trace glyph edges only — antialiasing coverage differing by a
@@ -98,7 +98,7 @@ pixels because they contain more glyph edges, not larger deltas.
 
 - **Hinting kept.** The task said drop it; the sources contain only a `prep`
   table (no per-glyph programs) and keeping it costs ~0 bytes while eliminating
-  a rasterization variable. Dropping unused OpenType *features* was also not
+  a rasterization variable. Dropping unused OpenType _features_ was also not
   done — all kept, since removing any present feature can change shaping and
   saves little.
 - **Copied faces keep fontsource's exact declared `unicode-range`.** The rule
