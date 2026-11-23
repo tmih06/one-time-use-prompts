@@ -14,8 +14,8 @@
     "deploy": "bun run build && bunx wrangler pages deploy",
     "sync": "bun run scripts/sync-prompts.ts",
     "lint": "vp lint --type-aware --type-check",
-    "fmt": "vp fmt",
-    "check": "vp check && vp lint --type-aware --type-check",
+    "fmt": "vp fmt '!prompts/**'",
+    "check": "vp check '!prompts/**' && vp lint --type-aware --type-check",
     "typecheck": "tsc --noEmit && bun run --cwd site types:check"
   },
   "devDependencies": {
