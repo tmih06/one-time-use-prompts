@@ -3,11 +3,24 @@ import { Home } from "@/components/home";
 import Base from "@/layouts/base.astro";
 import { getPrompts } from "@/lib/prompts";
 import { appName } from "@/lib/shared";
+import { defaultDescription, defaultOgImage, latest, pageGraph } from "@/lib/seo";
 
-const description =
-  "A curated library of focused prompts that run exactly once — at project creation or on an existing codebase.";
+const prompts = getPrompts();
+const title = `${appName}: prompts that run exactly once`;
+const modified = latest(prompts);
+const jsonLd = pageGraph({
+  site: Astro.site!,
+  kind: "home",
+  path: "/",
+  title,
+  description: defaultDescription,
+  image: defaultOgImage,
+  crumbs: [{ name: appName, path: "/" }],
+  modified,
+  list: prompts,
+});
 ---
 
-<Base description={description} ogTitle={appName} ogType="website">
-  <Home prompts={getPrompts()} />
+<Base title={title} description={defaultDescription} path="/" jsonLd={jsonLd}>
+  <Home prompts={prompts} />
 </Base>

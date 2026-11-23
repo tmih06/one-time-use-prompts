@@ -3,6 +3,7 @@ import { Gallery } from "@/components/gallery";
 import { PromptPage } from "@/components/prompt-page";
 import Base from "@/layouts/base.astro";
 import { getPrompts } from "@/lib/prompts";
+import { browseCrumbs, browseMeta, defaultOgImage, pageGraph, promptCrumbs, promptPath } from "@/lib/seo";
 import { getPageImageUrl } from "@/lib/shared";
 import { docs, source } from "@/lib/source";
 import { fetchTweets } from "@/lib/tweet";
@@ -40,18 +41,63 @@ const related = getPrompts()
   .filter((p) => p.splat !== here?.splat)
   .sort((a, b) => rank(b) - rank(a))
   .slice(0, 3);
+
+const pageImage = page ? getPageImageUrl(page).url : defaultOgImage;
+const site = Astro.site!;
+
+// Everything a crawler reads about this page, built in lib/seo.ts.
+const browse = isGallery ? browseMeta(slugs[0], slugs[1]) : undefined;
+const meta =
+  isGallery && browse
+    ? {
+        title: browse.title,
+        description: browse.description,
+        path: slugs.length ? `/prompts/${slugs.join("/")}` : "/prompts",
+        modified: browse.modified,
+        jsonLd: pageGraph({
+          site,
+          kind: "browse",
+          path: slugs.length ? `/prompts/${slugs.join("/")}` : "/prompts",
+          title: browse.title,
+          description: browse.description,
+          image: pageImage,
+          crumbs: browseCrumbs(slugs[0], slugs[1]),
+          modified: browse.modified,
+          list: browse.prompts,
+        }),
+      }
+    : {
+        title: here!.title,
+        description: here!.description,
+        path: promptPath(here!),
+        modified: here!.updated,
+        jsonLd: pageGraph({
+          site,
+          kind: "prompt",
+          path: promptPath(here!),
+          title: here!.title,
+          description: here!.description,
+          image: pageImage,
+          crumbs: promptCrumbs(here!),
+          modified: here!.updated,
+          prompt: here!,
+        }),
+      };
 ---
 
-{
-  isGallery ? (
-    <Base
-      description="A curated library of focused prompts that run exactly once — at project creation or on an existing codebase."
-      ogImage={page ? getPageImageUrl(page).url : undefined}
-    >
+<Base
+  title={meta.title}
+  description={meta.description}
+  path={meta.path}
+  ogImage={pageImage}
+  ogType={isGallery ? "website" : "article"}
+  modified={isGallery ? undefined : meta.modified}
+  jsonLd={meta.jsonLd}
+>
+  {
+    isGallery ? (
       <Gallery prompts={getPrompts()} phase={slugs[0]} purpose={slugs[1]} />
-    </Base>
-  ) : (
-    <Base ogImage={getPageImageUrl(page!).url}>
+    ) : (
       <PromptPage
         path={page!.path}
         pathname={page!.url}
@@ -59,6 +105,6 @@ const related = getPrompts()
         tweets={tweets}
         related={related}
       />
-    </Base>
-  )
-}
+    )
+  }
+</Base>

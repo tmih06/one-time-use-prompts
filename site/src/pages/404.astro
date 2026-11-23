@@ -4,7 +4,11 @@ import { HomeShell } from "@/components/site-provider";
 import Base from "@/layouts/base.astro";
 ---
 
-<Base>
+<Base
+  title="Page not found"
+  description="This page does not exist. Browse the library of one-time-use prompts instead."
+  noindex
+>
   <HomeShell pathname={Astro.url.pathname}>
     <DefaultNotFound />
   </HomeShell>

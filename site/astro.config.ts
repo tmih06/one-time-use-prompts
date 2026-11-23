@@ -21,6 +21,8 @@ const leaveDocsToFumadocs: Plugin = {
 };
 
 export default defineConfig({
+  // Production origin: canonical URLs, Open Graph URLs, JSON-LD and the sitemap are built from it.
+  site: "https://prompts.one-time-use.com",
   output: "static",
   server: { port: 3000 },
   devToolbar: { enabled: false },

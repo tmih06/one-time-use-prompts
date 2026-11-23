@@ -39,6 +39,8 @@ function init(root: HTMLElement) {
   const hrefFor = (key: string) => (key ? "/prompts/" + key : "/prompts");
 
   let current = root.dataset.current ?? "";
+  // Filtering rewrites the address bar in place, so the tab title follows it.
+  const titles: Record<string, string> = JSON.parse(root.dataset.titles ?? "{}");
   let run = 0;
 
   /* Morphing slots -------------------------------------------------------- */
@@ -265,6 +267,7 @@ function init(root: HTMLElement) {
     if (key === current) return;
     current = key;
     if (push) history.pushState(null, "", hrefFor(key));
+    if (titles[key]) document.title = titles[key];
     syncPills();
     syncMorphs(true);
     void syncCards(true);

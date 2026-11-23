@@ -2,7 +2,8 @@ import { ChevronRight, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { PromptCard, shell } from "@/components/prompt-card";
 import { HomeShell } from "@/components/site-provider";
-import { count, PHASES, purposeTitle, type PromptSummary } from "@/lib/prompts";
+import { PHASES, purposeTitle, type PromptSummary } from "@/lib/prompts";
+import { browseMeta, documentTitle } from "@/lib/seo";
 import { contributingUrl } from "@/lib/shared";
 
 interface GalleryProps {
@@ -170,6 +171,11 @@ export function Gallery({ prompts, phase, purpose }: GalleryProps) {
       <main
         data-gallery
         data-current={current}
+        data-titles={JSON.stringify(
+          Object.fromEntries(
+            states.map((s) => [s.key, documentTitle(browseMeta(s.phase, s.purpose).title)]),
+          ),
+        )}
         className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6"
       >
         <header data-reveal className="pt-10 sm:pt-14">
