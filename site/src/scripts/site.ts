@@ -1,4 +1,5 @@
 import Lenis from "lenis";
+import { initAnalytics, trackPromptCopy } from "./analytics";
 
 /** All page interactivity. Pages are static HTML; this replaces client-side React. */
 
@@ -132,7 +133,7 @@ function flashCopied(button: HTMLElement) {
   }, 1500);
 }
 
-function copyFrom(button: HTMLElement) {
+function copyFrom(button: HTMLElement, trustedClick: boolean) {
   const figure = button.closest("figure");
   const heading = button.closest<HTMLElement>("h1,h2,h3,h4,h5,h6");
   const text = figure
@@ -140,7 +141,11 @@ function copyFrom(button: HTMLElement) {
     : heading
       ? `${location.origin}${location.pathname}#${heading.id}`
       : "";
-  void navigator.clipboard.writeText(text).then(() => flashCopied(button));
+  void navigator.clipboard.writeText(text).then(() => {
+    flashCopied(button);
+    // A prompt page's only code block is the whole prompt, so its copy button is a prompt copy.
+    if (figure) trackPromptCopy(trustedClick);
+  });
 }
 
 /* Events ------------------------------------------------------------------ */
@@ -158,7 +163,7 @@ document.addEventListener("click", (event) => {
   if (button.matches(TRIGGER)) return openSearch();
 
   if (button.getAttribute("aria-label") === "Toggle Menu") return setMenu(!menuOpen);
-  if (button.matches("[aria-live]")) copyFrom(button);
+  if (button.matches("[aria-live]")) copyFrom(button, event.isTrusted);
 });
 
 for (const type of ["pointerover", "focusin"] as const) {
@@ -199,6 +204,8 @@ for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-ask]")) 
 }
 
 if (import.meta.env.DEV) void import("./dev-tools");
+
+initAnalytics();
 
 /* Browse pages filter in place; the module only loads where there is a gallery. */
 if (document.querySelector("[data-gallery]")) void import("./gallery");

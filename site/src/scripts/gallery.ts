@@ -5,7 +5,7 @@
  * a link to that URL, so nothing here is required for the page to work.
  */
 
-export {};
+import { trackGalleryFilter } from "./analytics";
 
 const EASE_TRAVEL = "cubic-bezier(0.45, 0, 0.1, 1)";
 const EASE_ARRIVE = "cubic-bezier(0.25, 0.8, 0.25, 1)";
@@ -276,7 +276,9 @@ function init(root: HTMLElement) {
     const pill = (event.target as Element).closest<HTMLAnchorElement>("a[data-filter-key]");
     if (!pill) return;
     event.preventDefault();
-    go(pill.dataset.filterKey!, true);
+    const key = pill.dataset.filterKey!;
+    if (event.isTrusted && key !== current) trackGalleryFilter(key);
+    go(key, true);
   });
 
   addEventListener("popstate", () => go(keyFromPath(), false));
