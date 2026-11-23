@@ -17,18 +17,7 @@ const isTyping = (target: EventTarget | null) =>
 
 /* Theme ------------------------------------------------------------------ */
 
-/** Where the theme circle grows from: the visible toggle, else the top-right corner. */
-function themeOrigin(from?: Element | null) {
-  const el =
-    from ??
-    [...document.querySelectorAll<HTMLElement>("[data-theme-toggle]")].find((t) => t.offsetParent);
-  const box = el?.getBoundingClientRect();
-  return box
-    ? { x: box.left + box.width / 2, y: box.top + box.height / 2 }
-    : { x: innerWidth - 32, y: 32 };
-}
-
-function toggleTheme(from?: Element | null) {
+function toggleTheme() {
   const root = document.documentElement;
   const next = root.classList.contains("dark") ? "light" : "dark";
   const apply = () => {
@@ -40,22 +29,17 @@ function toggleTheme(from?: Element | null) {
     root.style.colorScheme = next;
     try {
       localStorage.setItem("theme", next);
-    } catch {}
+    } catch {
+      /* Private mode or blocked storage: the theme still applies for this visit. */
+    }
     void getComputedStyle(root).opacity; // flush styles while transitions are off
     requestAnimationFrame(() => freeze.remove());
   };
   if (!document.startViewTransition || reducedMotion) return apply();
 
-  const { x, y } = themeOrigin(from);
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  /* data-theming lets CSS give this fade its own slower timing than the page fade. */
   root.setAttribute("data-theming", "");
   const transition = document.startViewTransition(apply);
-  void transition.ready.then(() =>
-    root.animate(
-      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-      { duration: 600, easing: EASE_TRAVEL, pseudoElement: "::view-transition-new(root)" },
-    ),
-  );
   void transition.finished.finally(() => root.removeAttribute("data-theming"));
 }
 
@@ -170,7 +154,7 @@ document.addEventListener("click", (event) => {
 
   const button = target.closest<HTMLElement>("button");
   if (!button) return;
-  if (button.matches("[data-theme-toggle]")) return toggleTheme(button);
+  if (button.matches("[data-theme-toggle]")) return toggleTheme();
   if (button.matches(TRIGGER)) return openSearch();
 
   if (button.getAttribute("aria-label") === "Toggle Menu") return setMenu(!menuOpen);

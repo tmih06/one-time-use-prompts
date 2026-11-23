@@ -313,17 +313,17 @@ nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
   animation-duration: 200ms;
 }
 
-/* The theme switch is a circle growing from the toggle that was pressed. */
+/*
+ * The theme switch is a calm whole-page crossfade: the built-in view
+ * transition dissolve, slowed down and softened relative to the 200ms
+ * page fade. mix-blend-mode: normal keeps it a true dissolve on engines
+ * that still default to plus-lighter compositing.
+ */
 html[data-theming]::view-transition-old(root),
 html[data-theming]::view-transition-new(root) {
-  animation: none;
   mix-blend-mode: normal;
-}
-html[data-theming]::view-transition-old(root) {
-  z-index: 1;
-}
-html[data-theming]::view-transition-new(root) {
-  z-index: 2;
+  animation-duration: 450ms;
+  animation-timing-function: var(--ease-arrive);
 }
 html[data-theming] #nd-nav {
   view-transition-name: none;
