@@ -15,6 +15,7 @@ interface PromptSummary {
   phase: string;
   purpose: string;
   tags: string[];
+  preview: string[];
 }
 
 const PHASES = [
@@ -34,20 +35,38 @@ const PHASES = [
 
 // Page metadata is already bundled with `source`, so this runs the same on the
 // server (prerender) and in the SPA shell — no static server-fn cache needed.
-function getPrompts(): PromptSummary[] {
-  return source
-    .getPages()
-    .filter((page) => page.slugs.length === 3)
-    .map((page) => ({
-      splat: page.slugs.join("/"),
-      id: page.slugs[2],
-      title: page.data.title,
-      description: page.data.description ?? "",
-      phase: page.slugs[0],
-      purpose: page.slugs[1],
-      tags: page.data.tags ?? [],
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+async function getPrompts(): Promise<PromptSummary[]> {
+  const pages = await Promise.all(
+    source
+      .getPages()
+      .filter((page) => page.slugs.length === 3)
+      .map(async (page) => ({
+        splat: page.slugs.join("/"),
+        id: page.slugs[2],
+        title: page.data.title,
+        description: page.data.description ?? "",
+        phase: page.slugs[0],
+        purpose: page.slugs[1],
+        tags: page.data.tags ?? [],
+        preview: promptTop(await page.data.getText("processed")),
+      })),
+  );
+  return pages.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/**
+ * First lines of the prompt itself: the processed markdown is the prompt
+ * wrapped in a ```markdown fence, so strip fences and blank padding.
+ */
+const PREVIEW_LINES = 9;
+function promptTop(markdown: string): string[] {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("```"))
+    .join("\n")
+    .trim()
+    .split("\n")
+    .slice(0, PREVIEW_LINES);
 }
 
 export const Route = createFileRoute("/")({
@@ -176,11 +195,20 @@ function Home() {
               >
                 {/* inset "preview" well: the top of the prompt file, plus its tags */}
                 <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed">
-                  <span className="mb-2 text-muted-foreground/70">{p.id}.md</span>
-                  <span className="line-clamp-2 text-brand">{`# ${p.title}`}</span>
-                  <span className="mt-2 line-clamp-3 text-muted-foreground">
-                    {`> ${p.description}`}
-                  </span>
+                  {p.preview.map((line, i) => (
+                    <span
+                      key={i}
+                      className={
+                        line.startsWith("#")
+                          ? "text-brand"
+                          : line.startsWith(">")
+                            ? "text-muted-foreground"
+                            : "text-foreground/80"
+                      }
+                    >
+                      {line || "\u00a0"}
+                    </span>
+                  ))}
                   <span className="mt-auto flex flex-wrap gap-1 pt-3 font-sans">
                     {p.tags.slice(0, 4).map((t) => (
                       <span
