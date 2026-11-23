@@ -36,6 +36,20 @@
       ]
     },
     {
+      "id": "prune-tests",
+      "title": "Prune Tests That Guard No Behavior",
+      "description": "Once per codebase, when the test suite has grown bloated — delete or rewrite every test that guards no behavior so each remaining test fails on a regression and only on a regression.",
+      "phase": "existing",
+      "purpose": "quality",
+      "one_time": true,
+      "tags": ["testing", "refactoring", "tech-debt", "agents"],
+      "author": "Maze (@mazeincoding)",
+      "source": [
+        "https://x.com/mazeincoding/status/2122718134679298058",
+        "https://github.com/caldoai/skills/blob/main/skills/prune-tests/SKILL.md"
+      ]
+    },
+    {
       "id": "optimize-web-font-loading",
       "title": "Optimize Web Font Loading Without Changing Rendering",
       "description": "Once per site, when web fonts are slowing page loads — subset, split and preload fonts to shrink font bytes as far as possible while keeping rendering pixel-identical.",
