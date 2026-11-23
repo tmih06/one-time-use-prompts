@@ -2,11 +2,13 @@ import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import type { Tweet } from "react-tweet/api";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { getMDXComponents } from "@/components/mdx";
+import { PromptUsage } from "@/components/analytics-panels";
 import { PromptActions } from "@/components/prompt-actions";
 import { PromptCard } from "@/components/prompt-card";
 import { PromptTags } from "@/components/prompt-tags";
 import { HomeShell } from "@/components/site-provider";
 import { TweetSourceCard } from "@/components/tweet-card";
+import { analytics } from "@/lib/analytics";
 import { PHASES, purposeTitle, type PromptSummary } from "@/lib/prompts";
 import { getSourceUrl } from "@/lib/shared";
 import { docs } from "@/lib/source";
@@ -87,9 +89,14 @@ export function PromptPage({
             </DocsBody>
           </div>
           <aside data-reveal className="lg:self-stretch">
-            <div className="flex flex-col gap-6 lg:sticky lg:top-20">
+            {/* Taller than a short screen once usage is added, so it scrolls inside itself while it sticks. */}
+            <div
+              data-lenis-prevent
+              className="flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-width:thin]"
+            >
               <PromptActions markdownUrl={markdownUrl} githubUrl={getSourceUrl(path)} />
               {tweet && <TweetSourceCard tweet={tweet} />}
+              {analytics && <PromptUsage snapshot={analytics} id={pathname.split("/").pop()!} />}
             </div>
           </aside>
         </div>

@@ -7,18 +7,21 @@ import type { PromptSummary } from "@/lib/prompts";
 const TRENDING_SHOWN = 5;
 
 /** tuffui's card: a raised shell, a header, and a darker well that holds the content. */
-const card =
-  "w-full rounded-[1.375rem] bg-surface p-1.5 text-left 2xl:absolute 2xl:inset-y-0 2xl:my-auto 2xl:h-fit 2xl:w-72";
+const card = "w-full rounded-[1.375rem] bg-surface p-1.5 text-left";
+/** In the hero, on very wide screens, the cards float in the empty space beside the headline. */
+const flank = "2xl:absolute 2xl:inset-y-0 2xl:my-auto 2xl:h-fit 2xl:w-72";
 const well = "rounded-2xl bg-surface-inset p-3";
 
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 
 function CardHeader({
+  id,
   icon,
   title,
   subtitle,
   right,
 }: {
+  id: string;
   icon: ReactNode;
   title: string;
   subtitle: string;
@@ -30,7 +33,9 @@ function CardHeader({
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <h2 className="text-sm font-medium leading-tight">{title}</h2>
+        <h2 id={id} className="text-sm font-medium leading-tight">
+          {title}
+        </h2>
         <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
       </div>
       {right}
@@ -70,6 +75,82 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+/** The usage card: a change badge, a two-line chart and the totals. Used in the hero and on prompt pages. */
+function UsageCard({
+  className,
+  subtitle,
+  days,
+  views,
+  copies,
+  visits,
+}: {
+  className: string;
+  subtitle: string;
+  days: string[];
+  views: number[];
+  copies: number[];
+  visits?: number[] | null;
+}) {
+  const totalViews = sum(views);
+  const totalCopies = sum(copies);
+  const span = days.length;
+  return (
+    <section data-reveal aria-labelledby="usage-title" className={className}>
+      <CardHeader
+        id="usage-title"
+        icon={<ChartColumn aria-hidden />}
+        title="Usage"
+        subtitle={subtitle}
+        right={
+          <div className="flex flex-col items-end">
+            <p className="text-xl font-semibold leading-none tabular-nums">
+              {formatCount(totalViews)}
+            </p>
+            <Delta values={views} />
+          </div>
+        }
+      />
+      <div className={well}>
+        <div className="flex gap-1.5">
+          <LegendPill color="var(--series-views)">Views</LegendPill>
+          <LegendPill color="var(--series-copies)">Copies</LegendPill>
+        </div>
+        <UsageChart
+          className="mt-3"
+          axis
+          days={days}
+          emptyText="No activity yet"
+          label={`Last ${span} days: ${totalViews} views and ${totalCopies} copies`}
+          series={[
+            { values: views, color: "var(--series-views)" },
+            { values: copies, color: "var(--series-copies)" },
+          ]}
+        />
+        <dl className={`mt-3 grid gap-1.5 ${visits ? "grid-cols-3" : "grid-cols-2"}`}>
+          {visits && <Stat label="Visits" value={sum(visits)} />}
+          <Stat label="Views" value={totalViews} />
+          <Stat label="Copies" value={totalCopies} />
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+/** One prompt's usage, for the sidebar of its page. */
+export function PromptUsage({ snapshot, id }: { snapshot: AnalyticsSnapshot; id: string }) {
+  const none = snapshot.days.map(() => 0);
+  const series = snapshot.perPrompt[id];
+  return (
+    <UsageCard
+      className={card}
+      subtitle={`Last ${snapshot.days.length} days`}
+      days={snapshot.days}
+      views={series?.views ?? none}
+      copies={series?.copies ?? none}
+    />
+  );
+}
+
 /**
  * Public usage in the hero, as two cards in tuffui's style. Stacked under the
  * buttons on narrower screens; on very wide ones they sit in the empty space either
@@ -86,14 +167,17 @@ export function HeroAnalytics({
   const trending = snapshot.trending.filter((t) => byId.has(t.id)).slice(0, TRENDING_SHOWN);
   const top = Math.max(1, ...trending.map((t) => t.score));
   const { visits, promptViews, promptCopies } = snapshot.totals;
-  const views = sum(promptViews);
-  const copies = sum(promptCopies);
   const span = snapshot.days.length;
 
   return (
     <div className="mt-12 grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] items-start gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))] 2xl:contents">
-      <section data-reveal aria-labelledby="trending-title" className={`${card} 2xl:left-8`}>
+      <section
+        data-reveal
+        aria-labelledby="trending-title"
+        className={`${card} ${flank} 2xl:left-8`}
+      >
         <CardHeader
+          id="trending-title"
           icon={<TrendingUp aria-hidden />}
           title="Trending"
           subtitle="This week, by views and copies"
@@ -148,43 +232,14 @@ export function HeroAnalytics({
         </div>
       </section>
 
-      <section data-reveal aria-labelledby="usage-title" className={`${card} 2xl:right-8`}>
-        <CardHeader
-          icon={<ChartColumn aria-hidden />}
-          title="Usage"
-          subtitle={`Last ${span} days`}
-          right={
-            <div className="flex flex-col items-end">
-              <p className="text-xl font-semibold leading-none tabular-nums">
-                {formatCount(views)}
-              </p>
-              <Delta values={promptViews} />
-            </div>
-          }
-        />
-        <div className={well}>
-          <div className="flex gap-1.5">
-            <LegendPill color="var(--series-views)">Views</LegendPill>
-            <LegendPill color="var(--series-copies)">Copies</LegendPill>
-          </div>
-          <UsageChart
-            className="mt-3"
-            axis
-            days={snapshot.days}
-            emptyText="No activity yet"
-            label={`Last ${span} days: ${views} prompt views and ${copies} copies`}
-            series={[
-              { values: promptViews, color: "var(--series-views)" },
-              { values: promptCopies, color: "var(--series-copies)" },
-            ]}
-          />
-          <dl className={`mt-3 grid gap-1.5 ${visits ? "grid-cols-3" : "grid-cols-2"}`}>
-            {visits && <Stat label="Visits" value={sum(visits)} />}
-            <Stat label="Views" value={views} />
-            <Stat label="Copies" value={copies} />
-          </dl>
-        </div>
-      </section>
+      <UsageCard
+        className={`${card} ${flank} 2xl:right-8`}
+        subtitle={`Last ${span} days`}
+        days={snapshot.days}
+        views={promptViews}
+        copies={promptCopies}
+        visits={visits}
+      />
     </div>
   );
 }
