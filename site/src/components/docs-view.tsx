@@ -8,12 +8,13 @@ import { ContributeLabel } from "@/components/contribute-link";
 import { getMDXComponents } from "@/components/mdx";
 import { PromptActions } from "@/components/prompt-actions";
 import { PromptTags } from "@/components/prompt-tags";
-import { TweetCards } from "@/components/tweet-card";
+import { TweetSourceCard } from "@/components/tweet-card";
 import { SidebarFolder, SidebarItem } from "@/components/sidebar-tree";
 import { SiteProvider } from "@/components/site-provider";
 import { baseOptions } from "@/lib/layout.shared";
 import { contributingUrl, getSourceUrl } from "@/lib/shared";
 import { docs } from "@/lib/source";
+import { tweetIdFromUrl } from "@/lib/tweet";
 
 interface DocsViewProps {
   path: string;
@@ -65,6 +66,15 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
   if (!page) throw new Error(`unknown page: ${path}`);
   const MDX = page.body;
 
+  // Sources that rendered as a source card don't need a link chip too — the
+  // card itself links out. Only the first tweet gets a card. Chips stay for everything else, and for tweets
+  // that failed to fetch.
+  const renderedTweetIds = new Set(tweets.slice(0, 1).map((t) => t.id_str));
+  const sourceChips = (page.source ?? []).filter((url) => {
+    const id = tweetIdFromUrl(url);
+    return !id || !renderedTweetIds.has(id);
+  });
+
   return (
     <SiteProvider pathname={pathname}>
       <DocsLayout
@@ -87,7 +97,13 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
           full
           tableOfContent={{
             enabled: true,
-            component: <PromptActions markdownUrl={markdownUrl} githubUrl={getSourceUrl(path)} />,
+            component: (
+              <PromptActions
+                markdownUrl={markdownUrl}
+                githubUrl={getSourceUrl(path)}
+                tweets={tweets}
+              />
+            ),
           }}
           tableOfContentPopover={{ enabled: false }}
         >
@@ -97,21 +113,14 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
             purpose={page.purpose}
             tags={page.tags}
             author={page.author}
-            source={page.source}
+            source={sourceChips}
           />
           <DocsDescription>{page.description}</DocsDescription>
-          <div
-            className={
-              tweets.length > 0
-                ? "items-start gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]"
-                : undefined
-            }
-          >
-            <DocsBody>
-              <MDX components={getMDXComponents()} />
-            </DocsBody>
-            <TweetCards tweets={tweets} />
-          </div>
+          <DocsBody>
+            <MDX components={getMDXComponents()} />
+          </DocsBody>
+          {/* The rail is hidden below xl, so the source card follows the prompt there. */}
+          {tweets[0] && <TweetSourceCard tweet={tweets[0]} className="mt-6 max-w-md xl:hidden" />}
         </DocsPage>
       </DocsLayout>
       <DrawerTemplate />
