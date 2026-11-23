@@ -7,11 +7,15 @@ import type { PromptSummary } from "@/lib/prompts";
 export const shell = "rounded-[1.375rem] bg-surface p-1.5";
 
 /** Gallery card: a fading preview of the prompt file, then title, blurb and tags. */
-export function PromptCard({ prompt: p }: { prompt: PromptSummary }) {
+export function PromptCard({ prompt: p, hidden }: { prompt: PromptSummary; hidden?: boolean }) {
   return (
     <a
-      href={`/docs/${p.splat}`}
+      href={`/prompts/${p.splat}`}
       data-reveal
+      data-gallery-item
+      data-phase={p.phase}
+      data-purpose={p.purpose}
+      hidden={hidden}
       className={`press lift group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
     >
       <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">

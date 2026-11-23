@@ -169,6 +169,108 @@ html[data-motion] [data-reveal][data-in] {
   animation: rise 800ms var(--ease-arrive) var(--d, 0ms) backwards;
 }
 
+/*
+ * Gallery filters. The highlight is one element that slides between pills
+ * (scripts/gallery.ts places it); until that runs, the active pill paints its own
+ * background. The purpose row unfolds by animating its grid track from 0fr to 1fr.
+ */
+.filter-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 9999px;
+  background: var(--foreground);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 480ms var(--ease-arrive),
+    width 480ms var(--ease-arrive),
+    height 480ms var(--ease-arrive),
+    opacity 150ms linear;
+}
+.filter-nav[data-ready] .filter-indicator {
+  opacity: 1;
+}
+.filter-pill[aria-current] {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+.filter-nav[data-ready] .filter-pill[aria-current] {
+  background-color: transparent;
+}
+.filter-pill {
+  transition:
+    color 300ms var(--ease-travel) 90ms,
+    background-color 150ms var(--ease-out, ease-out),
+    scale 150ms var(--ease-out, ease-out),
+    translate 300ms var(--ease-arrive);
+}
+/*
+ * Morph slots: stacked variants of one piece of content (the title, a crumb, the
+ * purpose row). The active variant is in flow; the others wait invisibly in the same
+ * spot. scripts/gallery.ts animates the slot's size between variants; here they cross-fade
+ * through a blur, the one leaving drifting up and the one arriving rising from below.
+ */
+[data-morph] {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+[data-morph] > [data-variant] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(6px);
+  pointer-events: none;
+  white-space: nowrap;
+  transition:
+    opacity 170ms linear,
+    filter 200ms linear,
+    transform 450ms var(--ease-arrive),
+    visibility 0s linear 450ms;
+}
+[data-morph="y"] > [data-variant] {
+  display: block;
+  right: 0;
+  white-space: normal;
+}
+[data-morph] > [data-variant][data-leaving] {
+  transform: translateY(-6px);
+}
+[data-morph] > [data-variant][data-active] {
+  position: relative;
+  visibility: visible;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 30ms, 30ms, 30ms, 0s;
+}
+.crumb-link {
+  transition: color 300ms var(--ease-arrive);
+}
+nav[data-depth="1"] [data-slot="crumb-phase"] .crumb-link,
+nav[data-depth="2"] [data-slot="crumb-purpose"] .crumb-link {
+  color: var(--foreground);
+}
+nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link {
+  color: var(--muted-foreground);
+}
+nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
+  color: var(--foreground);
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-indicator,
+  [data-morph] > [data-variant],
+  .crumb-link,
+  .filter-pill {
+    transition: none;
+  }
+}
+
 /* A new state's icon (copied check, restored copy) arrives with a small pop. */
 @keyframes icon-pop {
   from {

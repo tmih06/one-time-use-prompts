@@ -1,8 +1,8 @@
 import { createGetUrl } from "fumadocs-core/source";
 
 export const appName = "One-Time-Use Prompts";
-export const docsRoute = "/docs";
-export const docsImageRoute = "/og/docs";
+export const promptsRoute = "/prompts";
+export const promptsImageRoute = "/og/prompts";
 
 // fill this with your actual GitHub info, for example:
 export const gitConfig = {
@@ -30,7 +30,7 @@ export function getSourceUrl(path: string): string {
   return `${repoUrl}/blob/${gitConfig.branch}/prompts/${encodeURI(path)}`;
 }
 
-const getImageUrl = createGetUrl(docsImageRoute);
+const getImageUrl = createGetUrl(promptsImageRoute);
 
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, "image.webp"];

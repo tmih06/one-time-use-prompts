@@ -35,7 +35,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
               </p>
               <div data-reveal className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <a
-                  href="/docs"
+                  href="/prompts"
                   className={`${pill} bg-foreground text-background hover:opacity-90`}
                 >
                   Browse prompts
@@ -83,7 +83,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
               return n > 0 ? (
                 <a
                   key={phase.slug}
-                  href={`/docs/${phase.slug}`}
+                  href={`/prompts/${phase.slug}`}
                   data-reveal
                   className={`press lift group ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
                 >

@@ -175,7 +175,7 @@ async function main(): Promise<void> {
   // --- Generated landing pages -------------------------------------------
   const count = entries.length;
   const phaseCards = phases
-    .map((p) => `  <Card title="${PHASE_TITLES[p] ?? p}" href="/docs/${p}" />`)
+    .map((p) => `  <Card title="${PHASE_TITLES[p] ?? p}" href="/prompts/${p}" />`)
     .join("\n");
 
   await writeFile(
@@ -214,7 +214,7 @@ async function main(): Promise<void> {
       lines.push(`## ${PURPOSE_TITLES[purpose] ?? purpose}`, "");
       for (const item of items.sort((a, b) => a.title.localeCompare(b.title))) {
         lines.push(
-          `- **[${item.title}](/docs/${phase}/${purpose}/${item.id})** — ${item.description}`,
+          `- **[${item.title}](/prompts/${phase}/${purpose}/${item.id})** — ${item.description}`,
         );
       }
       lines.push("");

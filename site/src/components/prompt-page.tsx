@@ -47,10 +47,10 @@ export function PromptPage({
 
   const phase = PHASES.find((p) => p.slug === page.phase);
   const crumbs = [
-    { label: "Library", href: "/docs" },
-    ...(phase ? [{ label: phase.title, href: `/docs/${phase.slug}` }] : []),
+    { label: "Library", href: "/prompts" },
+    ...(phase ? [{ label: phase.title, href: `/prompts/${phase.slug}` }] : []),
     ...(page.phase && page.purpose
-      ? [{ label: purposeTitle(page.purpose), href: `/docs/${page.phase}/${page.purpose}` }]
+      ? [{ label: purposeTitle(page.purpose), href: `/prompts/${page.phase}/${page.purpose}` }]
       : []),
     { label: page.title, href: pathname },
   ];

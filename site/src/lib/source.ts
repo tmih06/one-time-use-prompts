@@ -2,7 +2,7 @@ import { llms, loader } from "fumadocs-core/source";
 import { pageSchema } from "fumadocs-core/source/schema";
 import { defineDocs } from "fumadocs-mdx/macro";
 import { z } from "zod";
-import { docsRoute } from "./shared";
+import { promptsRoute } from "./shared";
 
 export const docs = defineDocs({
   dir: "content/docs",
@@ -26,7 +26,7 @@ export const docs = defineDocs({
 
 export const source = loader({
   source: docs.toFumadocsSource(),
-  baseUrl: docsRoute,
+  baseUrl: promptsRoute,
 });
 
 export const docsLlms = llms(source, {

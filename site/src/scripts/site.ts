@@ -216,6 +216,9 @@ for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-ask]")) 
 
 if (import.meta.env.DEV) void import("./dev-tools");
 
+/* Browse pages filter in place; the module only loads where there is a gallery. */
+if (document.querySelector("[data-gallery]")) void import("./gallery");
+
 /* Smooth scrolling ---------------------------------------------------------- */
 
 // Imported statically so Lenis ships in the hashed, immutable-cached site bundle

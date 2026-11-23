@@ -5,6 +5,7 @@
   "sideEffects": [
     "**/*.css",
     "src/scripts/site.ts",
+    "src/scripts/gallery.ts",
     "src/scripts/dev-tools.tsx"
   ],
   "scripts": {
