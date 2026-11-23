@@ -75,7 +75,8 @@ Append an object to `prompts/catalog.json` under `prompts`:
 
 The file path is derived as `prompts/<phase>/<purpose>/<id>.md`. Set `author` and
 `source` when a prompt came from elsewhere; if either is unknown, ask the contributor —
-do not guess or drop it silently.
+do not guess or drop it silently. `x.com`/`twitter.com` status URLs render as a static
+tweet card on the site; deleted or protected tweets fall back to a plain link chip.
 
 ### 2. Write the prompt file
 

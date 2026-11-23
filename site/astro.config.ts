@@ -30,8 +30,15 @@ export default defineConfig({
   build: { format: "file", inlineStylesheets: "always" },
   vite: {
     plugins: [leaveDocsToFumadocs, fumadocsMdx(), tailwindcss()],
-    resolve: { alias: { tslib: "tslib/tslib.es6.js" } },
     // Takumi (OG images) ships native/wasm binaries, so it must stay external.
-    ssr: { external: ["takumi-js", "@takumi-rs/core", "@takumi-rs/wasm", "@takumi-rs/helpers"] },
+    // react-tweet imports CSS modules, so it must be bundled rather than externalized.
+    resolve: {
+      alias: { tslib: "tslib/tslib.es6.js" },
+      noExternal: ["react-tweet"],
+    },
+    ssr: {
+      external: ["takumi-js", "@takumi-rs/core", "@takumi-rs/wasm", "@takumi-rs/helpers"],
+      noExternal: ["react-tweet"],
+    },
   },
 });

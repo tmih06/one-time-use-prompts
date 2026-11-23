@@ -3,10 +3,12 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { PanelLeft } from "lucide-react";
+import type { Tweet } from "react-tweet/api";
 import { ContributeLabel } from "@/components/contribute-link";
 import { getMDXComponents } from "@/components/mdx";
 import { PromptActions } from "@/components/prompt-actions";
 import { PromptTags } from "@/components/prompt-tags";
+import { TweetCards } from "@/components/tweet-card";
 import { SidebarFolder, SidebarItem } from "@/components/sidebar-tree";
 import { SiteProvider } from "@/components/site-provider";
 import { baseOptions } from "@/lib/layout.shared";
@@ -19,6 +21,7 @@ interface DocsViewProps {
   markdownUrl: string;
   toc: TOCItemType[];
   tree: Root;
+  tweets?: Tweet[];
 }
 
 const iconButton =
@@ -57,7 +60,7 @@ function DrawerTemplate() {
   );
 }
 
-export function DocsView({ path, pathname, markdownUrl, toc, tree }: DocsViewProps) {
+export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }: DocsViewProps) {
   const page = docs.getPage(path);
   if (!page) throw new Error(`unknown page: ${path}`);
   const MDX = page.body;
@@ -97,6 +100,7 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree }: DocsViewPro
             source={page.source}
           />
           <DocsDescription>{page.description}</DocsDescription>
+          <TweetCards tweets={tweets} />
           <DocsBody>
             <MDX components={getMDXComponents()} />
           </DocsBody>

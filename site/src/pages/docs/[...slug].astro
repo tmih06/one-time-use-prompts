@@ -3,6 +3,7 @@ import { DocsView } from "@/components/docs-view";
 import Base from "@/layouts/base.astro";
 import { getPageImageUrl } from "@/lib/shared";
 import { docs, source } from "@/lib/source";
+import { fetchTweets } from "@/lib/tweet";
 
 export function getStaticPaths() {
   return source.getPages().map((page) => ({
@@ -15,6 +16,7 @@ const page = source.getPage(Astro.props.slugs)!;
 const doc = docs.getPage(page.path)!;
 await doc.preload();
 const { toc } = await doc.load();
+const tweets = await fetchTweets(doc.source);
 ---
 
 <Base ogImage={getPageImageUrl(page).url}>
@@ -24,5 +26,6 @@ const { toc } = await doc.load();
     markdownUrl={`${page.url}.md`}
     toc={toc}
     tree={source.getPageTree()}
+    tweets={tweets}
   />
 </Base>

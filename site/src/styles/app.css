@@ -5,6 +5,7 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 @import "lenis/dist/lenis.css";
+@import "react-tweet/theme.css";
 
 /*
  * Design tokens — modelled on tuffui.com.
