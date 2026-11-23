@@ -95,6 +95,17 @@
       "tags": ["ui", "frontend", "accessibility", "responsive"],
       "author": "Coffee with One (@coffeewithone)",
       "source": "https://x.com/coffeewithone/status/2124883419989458947"
+    },
+    {
+      "id": "audit-design-system-consistency",
+      "title": "Audit Design System Consistency",
+      "description": "Once per application, when buttons, cards and spacing have drifted into visual inconsistency — audit design tokens, shared components and component states, then produce a prioritized consistency and refactoring plan.",
+      "phase": "existing",
+      "purpose": "polish",
+      "one_time": true,
+      "tags": ["design-system", "ui", "audit", "frontend", "consistency"],
+      "author": "Sujay (@Sujay__Raj)",
+      "source": "https://x.com/Sujay__Raj/status/2123769780192813401"
     }
   ]
 }
