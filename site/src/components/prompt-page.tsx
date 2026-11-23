@@ -57,7 +57,12 @@ export function PromptPage({
 
   return (
     <HomeShell pathname={pathname}>
-      <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6">
+      <main
+        data-prompt-id={pathname.split("/").pop()}
+        data-phase={page.phase}
+        data-purpose={page.purpose}
+        className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6"
+      >
         <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="min-w-0">
             <header data-reveal>
