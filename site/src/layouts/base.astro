@@ -1,0 +1,55 @@
+---
+import geistFont from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import orbitronFont from "@fontsource-variable/orbitron/files/orbitron-latin-wght-normal.woff2?url";
+import { appName } from "@/lib/shared";
+import "@/styles/app.css";
+
+interface Props {
+  description?: string;
+  ogTitle?: string;
+  ogType?: string;
+  ogImage?: string;
+}
+
+const { description, ogTitle, ogType, ogImage } = Astro.props;
+---
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{appName}</title>
+    {description && <meta name="description" content={description} />}
+    {ogTitle && <meta property="og:title" content={ogTitle} />}
+    {ogType && <meta property="og:type" content={ogType} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <link rel="icon" href="data:," />
+    <link rel="preload" href={geistFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={orbitronFont} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      (() => {
+        let theme;
+        try {
+          theme = localStorage.getItem("theme");
+        } catch {}
+        theme ||= "dark";
+        if (theme === "system")
+          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.classList.add(theme);
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <slot />
+    <script is:inline>
+      if (/Windows|Linux/i.test(navigator.userAgent))
+        for (const key of document.querySelectorAll("[data-search-full] kbd:first-child"))
+          key.textContent = "Ctrl";
+    </script>
+    <script>
+      import "@/scripts/site";
+    </script>
+  </body>
+</html>

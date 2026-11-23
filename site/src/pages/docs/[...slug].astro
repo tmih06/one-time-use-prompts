@@ -1,0 +1,28 @@
+---
+import { DocsView } from "@/components/docs-view";
+import Base from "@/layouts/base.astro";
+import { getPageImageUrl } from "@/lib/shared";
+import { docs, source } from "@/lib/source";
+
+export function getStaticPaths() {
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.join("/") || undefined },
+    props: { slugs: page.slugs },
+  }));
+}
+
+const page = source.getPage(Astro.props.slugs)!;
+const doc = docs.getPage(page.path)!;
+await doc.preload();
+const { toc } = await doc.load();
+---
+
+<Base ogImage={getPageImageUrl(page).url}>
+  <DocsView
+    path={page.path}
+    pathname={page.url}
+    markdownUrl={`${page.url}.md`}
+    toc={toc}
+    tree={source.getPageTree()}
+  />
+</Base>

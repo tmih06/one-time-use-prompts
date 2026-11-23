@@ -10,13 +10,10 @@ node_modules/
 bun.lockb
 
 # Build output
-.output/
 dist/
 build/
 .cache/
-.tanstack/
 .source/
-.nitro/
 .vercel
 .nuxt
 
@@ -25,7 +22,6 @@ site/content/docs/*
 !site/content/docs/.gitkeep
 
 # Generated route tree
-site/src/routeTree.gen.ts
 
 # Local scratch / notes
 scratch/

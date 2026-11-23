@@ -1,10 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { ArrowRight, Plus } from "lucide-react";
 import type { CSSProperties } from "react";
 import { hue } from "@/components/prompt-tags";
-import { baseOptions } from "@/lib/layout.shared";
-import { appName, contributingUrl } from "@/lib/shared";
+import { HomeShell } from "@/components/site-provider";
+import { contributingUrl } from "@/lib/shared";
 import { source } from "@/lib/source";
 
 interface PromptSummary {
@@ -33,10 +31,8 @@ const PHASES = [
   },
 ] as const;
 
-// Page metadata (including the preview lines) is already bundled with `source`, so
-// this runs the same on the server (prerender) and in the SPA shell — no markdown
-// rendering (server-only in fumadocs) and no static server-fn cache needed.
-function getPrompts(): PromptSummary[] {
+// Page metadata (including the preview lines) is bundled with `source` at build time.
+export function getPrompts(): PromptSummary[] {
   return source
     .getPages()
     .filter((page) => page.slugs.length === 3)
@@ -53,33 +49,15 @@ function getPrompts(): PromptSummary[] {
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export const Route = createFileRoute("/")({
-  component: Home,
-  loader: () => getPrompts(),
-  head: () => ({
-    meta: [
-      {
-        name: "description",
-        content:
-          "A curated library of focused prompts that run exactly once — at project creation or on an existing codebase.",
-      },
-      { property: "og:title", content: appName },
-      { property: "og:type", content: "website" },
-    ],
-  }),
-});
-
 const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
 
 /** The layered "shell around an inset well" card recipe used across the site. */
 const shell = "rounded-[1.375rem] bg-surface p-1.5";
 const pill = "press inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium";
 
-function Home() {
-  const prompts = Route.useLoaderData();
-
+export function Home({ prompts }: { prompts: PromptSummary[] }) {
   return (
-    <HomeLayout {...baseOptions()}>
+    <HomeShell pathname="/">
       <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 sm:px-6">
         <section className="pt-4">
           <div className={shell}>
@@ -98,14 +76,13 @@ function Home() {
                 on an existing codebase. Copy one, run it, move on. No accounts, no paywall.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <Link
-                  to="/docs/$"
-                  params={{ _splat: "" }}
+                <a
+                  href="/docs"
                   className={`${pill} bg-foreground text-background hover:opacity-90`}
                 >
                   Browse prompts
                   <ArrowRight className="size-4" />
-                </Link>
+                </a>
                 <a
                   href={contributingUrl}
                   target="_blank"
@@ -143,14 +120,13 @@ function Home() {
               );
               // A phase with no prompts has no docs page yet — don't link to a 404.
               return n > 0 ? (
-                <Link
+                <a
                   key={phase.slug}
-                  to="/docs/$"
-                  params={{ _splat: phase.slug }}
+                  href={`/docs/${phase.slug}`}
                   className={`press group ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
                 >
                   {inner}
-                </Link>
+                </a>
               ) : (
                 <div key={phase.slug} className={`${shell} opacity-60`}>
                   {inner}
@@ -171,10 +147,9 @@ function Home() {
           </div>
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {prompts.map((p) => (
-              <Link
+              <a
                 key={p.splat}
-                to="/docs/$"
-                params={{ _splat: p.splat }}
+                href={`/docs/${p.splat}`}
                 className={`press group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
               >
                 {/* inset "preview" well: the top of the prompt file, plus its tags */}
@@ -219,11 +194,11 @@ function Home() {
                     {p.phase} · {p.purpose}
                   </p>
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
         </section>
       </main>
-    </HomeLayout>
+    </HomeShell>
   );
 }
