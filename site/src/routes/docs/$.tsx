@@ -4,7 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { docs, source } from "@/lib/source";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { baseOptions } from "@/lib/layout.shared";
-import { contributingUrl, getPageImageUrl, gitConfig, repoUrl } from "@/lib/shared";
+import { contributingUrl, getPageImageUrl, getSourceUrl } from "@/lib/shared";
 import { PromptActions } from "@/components/prompt-actions";
 import { ContributeLabel } from "@/components/contribute-link";
 import { PromptTags } from "@/components/prompt-tags";
@@ -51,7 +51,7 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
   const MDX = page.body;
   const mdxComponents = useMDXComponents();
 
-  const githubUrl = `${repoUrl}/blob/${gitConfig.branch}/content/docs/${encodeURI(path)}`;
+  const githubUrl = getSourceUrl(path);
 
   return (
     <DocsPage
