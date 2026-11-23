@@ -98,7 +98,7 @@ function setMenu(open: boolean) {
     const fragment = template.content.cloneNode(true) as DocumentFragment;
     menuPanel = fragment.firstElementChild as HTMLElement;
     const row = menuPanel.querySelector("[data-menu-row]")!;
-    const github = header.querySelector('a[aria-label="GitHub"]')?.cloneNode(true) as HTMLElement;
+    const github = header.querySelector('a[aria-label^="GitHub"]')?.cloneNode(true) as HTMLElement;
     if (github) {
       github.classList.add("-mx-1", "first:ms-0");
       row.prepend(github);
