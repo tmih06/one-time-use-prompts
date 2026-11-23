@@ -1,7 +1,7 @@
 import { BadgeCheck } from "lucide-react";
 import type { CSSProperties } from "react";
 import { XLogo } from "@/components/tweet-card";
-import { isVerifiedHandle } from "@/lib/prompts";
+import { formatDate, isVerifiedHandle } from "@/lib/prompts";
 
 type AiBrand = "claude" | "openai" | "gemini";
 
@@ -76,7 +76,16 @@ const chip =
  * platform's logo at the end. A model's own logo stands bare, no circle.
  * Avatars are plain lazy <img>s of the X account; if one fails the initial stays.
  */
-export function AuthorLine({ author, className = "" }: { author: string; className?: string }) {
+export function AuthorLine({
+  author,
+  updated,
+  className = "",
+}: {
+  author: string;
+  /** ISO date the prompt last changed, shown at the end of the line. */
+  updated?: string;
+  className?: string;
+}) {
   const { label, handle, ai } = parseAuthor(author);
   const verified = isVerifiedHandle(handle);
   return (
@@ -104,7 +113,12 @@ export function AuthorLine({ author, className = "" }: { author: string; classNa
       {verified && (
         <BadgeCheck className="-ms-1 size-3.5 shrink-0 text-brand" aria-label="Verified" />
       )}
-      {handle && <XLogo className="ms-auto size-3.5 shrink-0" />}
+      {updated && (
+        <time dateTime={updated} title="Last updated" className="ms-auto shrink-0 tabular-nums">
+          {formatDate(updated)}
+        </time>
+      )}
+      {handle && <XLogo className={`${updated ? "" : "ms-auto "}size-3.5 shrink-0`} />}
     </p>
   );
 }

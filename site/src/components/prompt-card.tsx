@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { AuthorLine } from "@/components/prompt-author";
 import { hue } from "@/components/prompt-tags";
-import type { PromptSummary } from "@/lib/prompts";
+import { formatDate, type PromptSummary } from "@/lib/prompts";
 
 /** The layered "shell around an inset well" card recipe used across the site. */
 export const shell = "rounded-[1.375rem] bg-surface p-1.5";
@@ -59,10 +59,17 @@ export function PromptCard({ prompt: p, hidden }: { prompt: PromptSummary; hidde
           </ul>
         )}
         {p.author ? (
-          <AuthorLine author={p.author} className="mt-auto pt-2" />
+          <AuthorLine author={p.author} updated={p.updated} className="mt-auto pt-2" />
         ) : (
-          <p className="mt-auto pt-2 text-[0.8125rem] capitalize text-muted-foreground/80">
-            {p.phase} · {p.purpose}
+          <p className="mt-auto flex items-center justify-between gap-2 pt-2 text-[0.8125rem] text-muted-foreground/80">
+            <span className="capitalize">
+              {p.phase} · {p.purpose}
+            </span>
+            {p.updated && (
+              <time dateTime={p.updated} title="Last updated" className="tabular-nums">
+                {formatDate(p.updated)}
+              </time>
+            )}
           </p>
         )}
       </div>

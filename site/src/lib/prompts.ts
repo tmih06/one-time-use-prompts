@@ -11,6 +11,8 @@ export interface PromptSummary {
   tags: string[];
   preview: string[];
   author?: string;
+  /** ISO date the prompt file last changed. */
+  updated?: string;
 }
 
 export const PHASES = [
@@ -47,6 +49,14 @@ export const isVerifiedHandle = (handle?: string) =>
 
 export const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
 
+export const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
 export const purposeTitle = (slug: string) => slug.charAt(0).toUpperCase() + slug.slice(1);
 
 // Page metadata (including the preview lines) is bundled with `source` at build time.
@@ -64,6 +74,7 @@ export function getPrompts(): PromptSummary[] {
       tags: page.data.tags ?? [],
       preview: page.data.preview ?? [],
       author: page.data.author,
+      updated: page.data.updated,
     }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }

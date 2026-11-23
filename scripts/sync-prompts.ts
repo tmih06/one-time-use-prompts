@@ -3,7 +3,7 @@
  * Generate the fumadocs content tree from prompts/ + prompts/catalog.json.
  *
  * Prompt .md files stay metadata-free — this script injects the catalog
- * metadata (title, description, phase, purpose, tags, author, source) as frontmatter —
+ * metadata (title, description, phase, purpose, tags, author, source, last-updated date) as frontmatter —
  * the site renders it as tags under the page title — so it is searchable
  * without polluting the source files that agents consume.
  *
@@ -15,6 +15,7 @@
 
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { $ } from "bun";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const PROMPTS_DIR = path.join(ROOT, "prompts");
@@ -55,6 +56,15 @@ const PURPOSE_TITLES: Record<string, string> = {
 
 const yaml = (v: string): string => JSON.stringify(v);
 
+/**
+ * When the prompt file last changed: its latest commit date, or the file's mtime
+ * for a prompt that is not committed yet. Needs full git history (CI checks out with fetch-depth: 0).
+ */
+async function lastUpdated(file: string): Promise<string> {
+  const iso = (await $`git log -1 --format=%cI -- ${file}`.cwd(ROOT).nothrow().text()).trim();
+  return iso || new Date(Bun.file(file).lastModified).toISOString();
+}
+
 /** First lines of the prompt itself (no code fences), shown in the home page cards. */
 const PREVIEW_LINES = 9;
 function promptTop(markdown: string): string[] {
@@ -84,11 +94,13 @@ async function main(): Promise<void> {
 
   // Read every prompt once (in parallel); both the page and the index use it.
   const bodies = new Map<string, string>();
+  const updated = new Map<string, string>();
   await Promise.all(
     entries.map(async (entry) => {
       const srcPath = path.join(PROMPTS_DIR, entry.phase, entry.purpose, `${entry.id}.md`);
       try {
         bodies.set(entry.id, await readFile(srcPath, "utf-8"));
+        updated.set(entry.id, await lastUpdated(srcPath));
       } catch {
         errors.push(`missing prompt file for catalog entry '${entry.id}': ${srcPath}`);
       }
@@ -125,6 +137,7 @@ async function main(): Promise<void> {
         `purpose: ${yaml(entry.purpose)}`,
         `tags: ${JSON.stringify(entry.tags)}`,
         `preview: ${JSON.stringify(promptTop(bodies.get(entry.id)!))}`,
+        `updated: ${yaml(updated.get(entry.id)!)}`,
         ...(entry.author ? [`author: ${yaml(entry.author)}`] : []),
         ...(entry.source === undefined
           ? []

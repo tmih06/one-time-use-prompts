@@ -55,49 +55,6 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
           </div>
         </section>
 
-        <section className="pt-16" aria-labelledby="phases">
-          <div data-reveal className="mb-8 flex items-end justify-between gap-4">
-            <h2 id="phases" className="text-2xl font-semibold tracking-tight">
-              Browse by phase
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {PHASES.map((phase) => {
-              const n = prompts.filter((p) => p.phase === phase.slug).length;
-              const inner = (
-                <div className="flex flex-col gap-1 px-3 pb-2.5 pt-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="font-medium">{phase.title}</h3>
-                    <span className="flex items-center gap-1.5 font-mono text-xs tabular-nums text-muted-foreground">
-                      {n > 0 ? count(n) : "Soon"}
-                      {n > 0 && (
-                        <ArrowRight className="size-3.5 -translate-x-1 opacity-0 transition-[opacity,translate] duration-300 ease-[var(--ease-arrive)] group-hover:translate-x-0 group-hover:opacity-100" />
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{phase.blurb}</p>
-                  <p className="mt-1.5 text-[0.8125rem] text-muted-foreground/80">{phase.kicker}</p>
-                </div>
-              );
-              // A phase with no prompts has no docs page yet — don't link to a 404.
-              return n > 0 ? (
-                <a
-                  key={phase.slug}
-                  href={`/prompts/${phase.slug}`}
-                  data-reveal
-                  className={`press lift group ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
-                >
-                  {inner}
-                </a>
-              ) : (
-                <div key={phase.slug} data-reveal className={`${shell} opacity-60`}>
-                  {inner}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
         <section className="py-16" aria-labelledby="all-prompts">
           <div data-reveal className="mb-8 flex items-end justify-between gap-4">
             <h2 id="all-prompts" className="text-2xl font-semibold tracking-tight">
@@ -107,6 +64,36 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
               {count(prompts.length)}
             </span>
           </div>
+          {/* Phases live here as filters, not a section of their own. A phase with no prompts has no page yet. */}
+          <nav data-reveal aria-label="Browse by phase" className="-mt-4 mb-8 flex flex-wrap gap-2">
+            {PHASES.map((phase) => {
+              const n = prompts.filter((p) => p.phase === phase.slug).length;
+              const body = (
+                <>
+                  {phase.title}
+                  <span className="font-mono text-xs tabular-nums opacity-60">
+                    {n > 0 ? n : "Soon"}
+                  </span>
+                </>
+              );
+              const base =
+                "press inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium bg-surface";
+              return n > 0 ? (
+                <a
+                  key={phase.slug}
+                  href={`/prompts/${phase.slug}`}
+                  title={phase.blurb}
+                  className={`${base} text-foreground/80 hover:bg-surface-raised hover:text-foreground`}
+                >
+                  {body}
+                </a>
+              ) : (
+                <span key={phase.slug} className={`${base} text-muted-foreground opacity-50`}>
+                  {body}
+                </span>
+              );
+            })}
+          </nav>
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {prompts.map((p) => (
               <PromptCard key={p.splat} prompt={p} />

@@ -16,6 +16,8 @@ export const docs = defineDocs({
       // First lines of the prompt, for the home page cards (see scripts/sync-prompts.ts).
       preview: z.array(z.string()).optional(),
       author: z.string().optional(),
+      // ISO date of the prompt file's last commit (see scripts/sync-prompts.ts).
+      updated: z.string().optional(),
       source: z.array(z.string()).optional(),
     }),
     postprocess: {
