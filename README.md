@@ -62,6 +62,7 @@ intent. The current folders are:
 | `documentation/` | README, architecture docs, onboarding guides         |
 | `operations/`    | Observability, performance, deployment, monitoring   |
 | `maintenance/`   | Technical debt, refactoring, upgrades, cleanup       |
+| `polish/`        | Fit-and-finish UI passes: visuals, copy, states, a11y |
 
 If a prompt does not fit an existing folder, propose a new one in the PR and explain why.
 Keep folder names lowercase and singular.

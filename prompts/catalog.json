@@ -73,6 +73,17 @@
         "https://x.com/DanKornas/status/2122795905602740651",
         "https://github.com/umutxyp/Seo-Promt-Master"
       ]
+    },
+    {
+      "id": "unslop-app",
+      "title": "Unslop an App Before Sharing",
+      "description": "Once per app, before you share it — a polish pass over the screens and flows recent work touched: responsive widths, every state, slop removal, accessibility, and a grouped fix report.",
+      "phase": "existing",
+      "purpose": "polish",
+      "one_time": true,
+      "tags": ["ui", "frontend", "accessibility", "responsive"],
+      "author": "Coffee with One (@coffeewithone)",
+      "source": "https://x.com/coffeewithone/status/2124883419989458947"
     }
   ]
 }
