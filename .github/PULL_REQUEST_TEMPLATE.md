@@ -9,8 +9,9 @@ before merge. If any item fails, the prompt is rejected or sent back for revisio
 - [ ] `id` is unique across the repository and equals the filename without `.md`.
 - [ ] `phase` and `purpose` in the catalog match the folder path (`creation`/`existing` + subfolder).
 - [ ] `one_time` is `true`.
-- [ ] The `.md` file contains **only the prompt** — no YAML frontmatter.
-- [ ] All required sections are present and in order: When to use, Context, Goal, Inputs,
+- [ ] The `.md` file contains **only the prompt** — no YAML frontmatter, no
+      `# Title` heading, no **When to use** note (those live in the catalog).
+- [ ] All required sections are present and in order: Context, Goal, Inputs,
       Instructions, Output format, Guardrails.
 
 ## Injection resistance

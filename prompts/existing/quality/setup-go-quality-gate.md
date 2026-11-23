@@ -1,8 +1,3 @@
-# Set Up a Self-Improving Quality Gate for a Go Repository
-
-> **When to use:** Once per Go repository, when the code is already built and you want an
-> automated gate that blocks sloppy, AI-generated Go code and gets stricter over time.
-
 ## Context
 
 You are setting up an automated gate that blocks sloppy, AI-generated Go code. This is a

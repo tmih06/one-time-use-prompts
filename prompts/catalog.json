@@ -3,6 +3,7 @@
     {
       "id": "setup-go-quality-gate",
       "title": "Set Up a Self-Improving Quality Gate for a Go Repository",
+      "description": "Once per Go repository, when the code is already built and you want an automated gate that blocks sloppy, AI-generated Go code and gets stricter over time.",
       "phase": "existing",
       "purpose": "quality",
       "one_time": true,

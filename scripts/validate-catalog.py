@@ -3,8 +3,9 @@
 
 Every entry must have the required fields, its derived path
 (prompts/<phase>/<purpose>/<id>.md) must exist, and every prompt file must have a
-catalog entry. Prompt files must not contain YAML frontmatter — metadata belongs in
-the catalog so agents consuming a prompt get clean input.
+catalog entry. Prompt files must not contain YAML frontmatter, a '# Title' heading, or a
+'> **When to use:**' note — title and description belong in the catalog so agents
+consuming a prompt get clean input.
 
 Usage:
     python3 scripts/validate-catalog.py
@@ -17,6 +18,7 @@ Exit codes:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -35,7 +37,7 @@ VALID_PURPOSES = {
     "operations",
     "maintenance",
 }
-REQUIRED_FIELDS = ["id", "title", "phase", "purpose", "one_time", "tags"]
+REQUIRED_FIELDS = ["id", "title", "description", "phase", "purpose", "one_time", "tags"]
 
 
 def check_entry(idx: int, entry: object, ids: set[str], files_on_disk: set[str], covered: set[str]) -> list[str]:
@@ -63,6 +65,10 @@ def check_entry(idx: int, entry: object, ids: set[str], files_on_disk: set[str],
         errors.append(f"{where}: purpose must be one of {sorted(VALID_PURPOSES)}")
     if entry.get("one_time") is not True:
         errors.append(f"{where}: one_time must be true")
+
+    description = entry.get("description")
+    if "description" in entry and not (isinstance(description, str) and description.strip()):
+        errors.append(f"{where}: description must be a non-empty string")
 
     tags = entry.get("tags")
     if not isinstance(tags, list) or not all(isinstance(t, str) for t in tags):
@@ -120,7 +126,16 @@ def main() -> int:
         if first.startswith("---"):
             errors.append(
                 f"{path}: contains YAML frontmatter — metadata belongs in catalog.json, "
-                "the prompt file must start with the '# Title' heading"
+                "the prompt file must start with its first section"
+            )
+        text = (ROOT / path).read_text(encoding="utf-8", errors="replace")
+        if re.search(r"^# ", text, re.MULTILINE) and re.match(r"\s*# ", text):
+            errors.append(
+                f"{path}: starts with a '# Title' heading — the title lives in catalog.json only"
+            )
+        if re.search(r"^>\s*\*\*When to use:\*\*", text, re.MULTILINE):
+            errors.append(
+                f"{path}: contains a '> **When to use:**' note — use the catalog 'description' instead"
             )
 
     print("=" * 60)

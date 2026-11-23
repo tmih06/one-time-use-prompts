@@ -51,6 +51,7 @@ Append an object to `prompts/catalog.json` under `prompts`:
 {
   "id": "your-prompt-id",
   "title": "Your Prompt Title",
+  "description": "One sentence on when to use this prompt.",
   "phase": "existing",
   "purpose": "quality",
   "one_time": true,
@@ -60,16 +61,17 @@ Append an object to `prompts/catalog.json` under `prompts`:
 }
 ```
 
-| Field      | Required | Notes                                             |
-| ---------- | -------- | ------------------------------------------------- |
-| `id`       | yes      | Kebab-case, must equal the filename without `.md` |
-| `title`    | yes      | Title case                                        |
-| `phase`    | yes      | `creation` or `existing`, must match the folder   |
-| `purpose`  | yes      | Folder name, must match the folder                |
-| `one_time` | yes      | Always `true`                                     |
-| `tags`     | yes      | 2–5 lowercase strings                             |
-| `author`   | no       | Who wrote it. Omit entirely if unknown            |
-| `source`   | no       | URL or list of URLs. Omit entirely if original    |
+| Field         | Required | Notes                                                            |
+| ------------- | -------- | ---------------------------------------------------------------- |
+| `id`          | yes      | Kebab-case, must equal the filename without `.md`                |
+| `title`       | yes      | Title case. Never repeated in the `.md` file                     |
+| `description` | yes      | One sentence on when to use it. Never repeated in the `.md` file |
+| `phase`       | yes      | `creation` or `existing`, must match the folder                  |
+| `purpose`     | yes      | Folder name, must match the folder                               |
+| `one_time`    | yes      | Always `true`                                                    |
+| `tags`        | yes      | 2–5 lowercase strings                                            |
+| `author`      | no       | Who wrote it. Omit entirely if unknown                           |
+| `source`      | no       | URL or list of URLs. Omit entirely if original                   |
 
 The file path is derived as `prompts/<phase>/<purpose>/<id>.md`. Set `author` and
 `source` when a prompt came from elsewhere; if either is unknown, ask the contributor —
@@ -77,11 +79,11 @@ do not guess or drop it silently.
 
 ### 2. Write the prompt file
 
-- Start with `# {{TITLE}}` — no frontmatter, no metadata.
+- Start directly with the first section — no frontmatter, no `# Title` heading, no
+  **When to use** note. Title and description live only in `catalog.json`.
 - Use `{{PLACEHOLDER}}` tokens for values the user must fill in. Never hard-code a
   specific company, framework, or path where a placeholder would do.
-- Have these sections, in order: **When to use** (a `>` blockquote), **Context**,
-  **Goal**, **Inputs**, **Instructions**, **Output format**, **Guardrails**.
+- Have these sections, in order: **Context**, **Goal**, **Inputs**, **Instructions**, **Output format**, **Guardrails**.
 - End with an **Output format** that asks for a concrete, reviewable artifact — a
   decision record, config file, or plan. Avoid "just answer in chat" prompts.
 
@@ -100,7 +102,8 @@ Prompt filenames are lowercase kebab-case and describe the action:
 ## Final checklist
 
 - [ ] Catalog entry has all required fields; `phase`/`purpose`/`id` match the file path.
-- [ ] Prompt file has **no** frontmatter — it starts with the `# Title` heading.
+- [ ] Prompt file has **no** frontmatter, `# Title` heading, or **When to use** note — it
+      starts with `## Context`.
 - [ ] `id` is unique across the catalog.
 - [ ] If the prompt was adapted from elsewhere, `author` and `source` credit the
       original author and URL.

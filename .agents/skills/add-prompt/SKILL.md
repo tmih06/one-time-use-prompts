@@ -54,8 +54,9 @@ creating it (lowercase, singular). If the phase is ambiguous, ask — do not gue
 Copy `templates/prompt-template.md` to `prompts/<phase>/<purpose>/<kebab-name>.md` and
 fill it in. Keep the author's content faithful — reformat, do not rewrite meaning.
 
-- Start with `# Title` — **no frontmatter**.
-- Sections in order: `> **When to use:**`, `## Context`, `## Goal`, `## Inputs`,
+- Start with `## Context` — **no frontmatter, no `# Title` heading, no `> **When to use:**`
+  note**. Title and description live only in `catalog.json`.
+- Sections in order: `## Context`, `## Goal`, `## Inputs`,
   `## Instructions`, `## Output format`, `## Guardrails`.
 - Use `{{UPPER_SNAKE}}` placeholders for anything the user must supply. Never hard-code a
   specific company, framework, or path where a placeholder belongs. If the prompt is
@@ -75,6 +76,7 @@ Append to `prompts/catalog.json`:
 {
   "id": "<filename without .md>",
   "title": "Title Case",
+  "description": "one sentence on when to use it",
   "phase": "creation|existing",
   "purpose": "<folder>",
   "one_time": true,

@@ -21,7 +21,7 @@ Prompts are split by project lifecycle first:
 | **Existing** | [`prompts/existing/`](prompts/existing) | Brownfield. The project is already built and running. Run these to audit, harden, document, or improve it. |
 
 Inside each phase, prompts are grouped by **purpose** (strategy, quality, security, ...).
-All prompt metadata — id, title, phase, purpose, tags, author, source — lives in
+All prompt metadata — id, title, description, phase, purpose, tags, author, source — lives in
 [`prompts/catalog.json`](prompts/catalog.json). The `.md` files themselves contain **only
 the prompt text**, so an agent that consumes one is not fed unrelated metadata. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the catalog schema.
@@ -29,7 +29,7 @@ the prompt text**, so an agent that consumes one is not fed unrelated metadata. 
 ## How to use a prompt
 
 1. Pick the prompt for the phase your project is currently in.
-2. Read its **When to use** note to confirm it applies — some are intentionally narrow.
+2. Read its description to confirm it applies — some are intentionally narrow.
 3. Copy the prompt `.md` file into your coding agent as the first message of a fresh
    session. You do not need `catalog.json` — it is for the library, not the agent.
 4. Fill in any `{{placeholders}}` with your project's details.

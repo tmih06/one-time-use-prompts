@@ -3,7 +3,7 @@
  * Generate the fumadocs content tree from prompts/ + prompts/catalog.json.
  *
  * Prompt .md files stay metadata-free — this script injects the catalog
- * metadata (title, phase, purpose, tags, author, source) as frontmatter —
+ * metadata (title, description, phase, purpose, tags, author, source) as frontmatter —
  * the site renders it as tags under the page title — so it is searchable
  * without polluting the source files that agents consume.
  *
@@ -24,6 +24,7 @@ const OUT_DIR = path.join(ROOT, "site", "content", "docs");
 interface CatalogEntry {
   id: string;
   title: string;
+  description: string;
   phase: "creation" | "existing";
   purpose: string;
   one_time: boolean;
@@ -53,21 +54,6 @@ const PURPOSE_TITLES: Record<string, string> = {
 };
 
 const yaml = (v: string): string => JSON.stringify(v);
-
-/** Extract the "> **When to use:** …" sentence to use as the page description. */
-function extractWhenToUse(body: string): string | undefined {
-  const lines = body.split("\n");
-  const start = lines.findIndex((l) => /^>\s*\*\*When to use:\*\*/.test(l));
-  if (start === -1) return undefined;
-  const parts: string[] = [];
-  for (let i = start; i < lines.length; i++) {
-    const m = lines[i].match(/^>\s?(.*)$/);
-    if (!m) break;
-    parts.push(m[1].replace(/^\*\*When to use:\*\*\s*/, ""));
-  }
-  const text = parts.join(" ").trim();
-  return text.length > 0 ? text : undefined;
-}
 
 async function main(): Promise<void> {
   const catalog = (await Bun.file(CATALOG).json()) as Catalog;
@@ -111,13 +97,10 @@ async function main(): Promise<void> {
   const pageWrites = [...byPhase.values()]
     .flatMap((purposes) => [...purposes.values()].flat())
     .map(async (entry) => {
-      const body = bodies.get(entry.id)!;
-      const description = extractWhenToUse(body) ?? `${entry.phase} / ${entry.purpose}`;
-
       // Show the raw prompt inside a fenced code block — readers copy it, not
       // read it rendered. The fence must be longer than any backtick run in
       // the prompt so embedded code blocks stay inside.
-      const prompt = body.trim();
+      const prompt = bodies.get(entry.id)!.trim();
       const maxRun = Math.max(3, ...(prompt.match(/`+/g) ?? []).map((r) => r.length + 1));
       const fence = "`".repeat(maxRun);
       const promptBlock = `${fence}markdown title="${entry.id}.md" lineNumbers\n${prompt}\n${fence}`;
@@ -125,7 +108,7 @@ async function main(): Promise<void> {
       const mdx = [
         "---",
         `title: ${yaml(entry.title)}`,
-        `description: ${yaml(description)}`,
+        `description: ${yaml(entry.description)}`,
         `phase: ${yaml(entry.phase)}`,
         `purpose: ${yaml(entry.purpose)}`,
         `tags: ${JSON.stringify(entry.tags)}`,
@@ -217,8 +200,9 @@ async function main(): Promise<void> {
     )) {
       lines.push(`## ${PURPOSE_TITLES[purpose] ?? purpose}`, "");
       for (const item of items.sort((a, b) => a.title.localeCompare(b.title))) {
-        const desc = extractWhenToUse(bodies.get(item.id)!) ?? "";
-        lines.push(`- **[${item.title}](/docs/${phase}/${purpose}/${item.id})** — ${desc}`);
+        lines.push(
+          `- **[${item.title}](/docs/${phase}/${purpose}/${item.id})** — ${item.description}`,
+        );
       }
       lines.push("");
     }
