@@ -152,8 +152,8 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
                 href={`/docs/${p.splat}`}
                 className={`press group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
               >
-                {/* inset "preview" well: the top of the prompt file, plus its tags */}
-                <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed">
+                {/* inset "preview" well: the top of the prompt file, fading out at the bottom */}
+                <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">
                   {p.preview.map((line, i) => (
                     <span
                       key={i}
@@ -168,29 +168,33 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
                       {line || "\u00a0"}
                     </span>
                   ))}
-                  <span className="mt-auto flex flex-wrap gap-1 pt-3 font-sans">
-                    {p.tags.slice(0, 4).map((t) => (
-                      <span
-                        key={t}
-                        className="tag !h-5 !px-2 !text-[0.6875rem]"
-                        style={{ "--h": hue(t) } as CSSProperties}
-                      >
-                        #{t}
-                      </span>
-                    ))}
-                  </span>
                 </div>
                 <div className="flex flex-col gap-1 px-3 pb-2.5 pt-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="flex min-w-0 items-center gap-2 font-medium">
                       <span className="truncate">{p.title}</span>
                     </h3>
-                    <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                      {p.tags.length} tags
-                    </span>
                   </div>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
-                  <p className="mt-1.5 text-[0.8125rem] capitalize text-muted-foreground/80">
+                  {p.tags.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-1" aria-label="Tags">
+                      {p.tags.slice(0, 5).map((t) => (
+                        <li
+                          key={t}
+                          className="tag !h-5 !px-2 !text-[0.6875rem]"
+                          style={{ "--h": hue(t) } as CSSProperties}
+                        >
+                          #{t}
+                        </li>
+                      ))}
+                      {p.tags.length > 5 && (
+                        <li className="tag tag-neutral !h-5 !px-2 !text-[0.6875rem]">
+                          +{p.tags.length - 5}
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                  <p className="mt-2 text-[0.8125rem] capitalize text-muted-foreground/80">
                     {p.phase} · {p.purpose}
                   </p>
                 </div>
