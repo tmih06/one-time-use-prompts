@@ -34,6 +34,17 @@
         "https://x.com/mazeincoding/status/2118378945557004477",
         "https://github.com/caldoai/skills/blob/main/skills/untangle-codebase/SKILL.md"
       ]
+    },
+    {
+      "id": "optimize-web-font-loading",
+      "title": "Optimize Web Font Loading Without Changing Rendering",
+      "description": "Once per site, when web fonts are slowing page loads — subset, split and preload fonts to shrink font bytes as far as possible while keeping rendering pixel-identical.",
+      "phase": "existing",
+      "purpose": "operations",
+      "one_time": true,
+      "tags": ["fonts", "performance", "web-fonts", "subsetting", "frontend"],
+      "author": "Shu (@shuding)",
+      "source": "https://x.com/shuding/status/2115855028737200211"
     }
   ]
 }
