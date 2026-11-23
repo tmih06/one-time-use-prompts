@@ -81,6 +81,22 @@ reach a deployed site.
   is teal on the light card surface (2.8:1), which the charts avoid by sitting in the inset wells, and the figures
   are also printed as text.
 
+## Deploying (Cloudflare Pages)
+
+The live site is a Git-connected Pages project: a push to `master` builds Production, other branches build Previews.
+The numbers are read **at build time**, so the build needs the variables from `.env.example` (everything except
+`ANALYTICS_SAMPLE`).
+
+- **Set them as _Secret_, not _Text_.** The repo's `wrangler.jsonc` (`pages_build_output_dir`) makes Pages read its
+  config from that file, and the build log then says `Build environment variables: (none found)`: plain-text dashboard
+  variables never reach the build. Secrets do. The `PUBLIC_` ones end up in the public bundle either way.
+- Production and Preview have separate variable sets. Only Production has them, so Preview builds show no graphs.
+- A variable change only applies to the **next** build: use Retry deployment on the latest Production deployment.
+- Don't deploy with `bun run deploy`; it targets whichever account wrangler is logged in to and the project is
+  connected to Git. Push instead.
+- To check a deploy: the page source should contain the Trending card and the bundle should contain the PostHog key.
+  No graphs and no build warning means the variables were missing, since the graphs are left out silently.
+
 ## Site visits (Cloudflare)
 
 Visits come from Cloudflare Web Analytics, not PostHog, and are optional:
