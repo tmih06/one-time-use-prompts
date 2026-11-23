@@ -9,6 +9,17 @@
       "one_time": true,
       "tags": ["go", "quality", "ci", "linting", "agents"],
       "author": "Claude Sonnet 5.5 Medium"
+    },
+    {
+      "id": "optimize-ci-speed",
+      "title": "Optimize CI Speed Without Weakening Checks",
+      "description": "Once per repository, when CI feedback is too slow — audit where pipeline time goes and restructure it toward sub-minute PR results without hiding or dropping any check.",
+      "phase": "existing",
+      "purpose": "quality",
+      "one_time": true,
+      "tags": ["ci", "performance", "testing", "bun"],
+      "author": "Pontus Abrahamsson (@pontusab)",
+      "source": "https://x.com/pontusab/status/2123771160261529982"
     }
   ]
 }
