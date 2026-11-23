@@ -1,3 +1,5 @@
+import Lenis from "lenis";
+
 /** All page interactivity. Pages are static HTML; this replaces client-side React. */
 
 const TRIGGER = "[data-search], [data-search-full]";
@@ -315,18 +317,14 @@ if (sidebarViewport) {
 
 if (import.meta.env.DEV) void import("./dev-tools");
 
-/* Smooth scrolling, once the browser is idle -------------------------------- */
+/* Smooth scrolling ---------------------------------------------------------- */
 
+// Imported statically so Lenis ships in the hashed, immutable-cached site bundle
+// every page loads and starts right away, instead of fetching a chunk at idle.
 if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  const start = () =>
-    void import("lenis").then(
-      ({ default: Lenis }) =>
-        new Lenis({
-          autoRaf: true,
-          lerp: 0.1,
-          prevent: (node) => node.closest(NESTED_SCROLLERS) !== null,
-        }),
-    );
-  if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 2000 });
-  else setTimeout(start, 200);
+  new Lenis({
+    autoRaf: true,
+    lerp: 0.1,
+    prevent: (node) => node.closest(NESTED_SCROLLERS) !== null,
+  });
 }
