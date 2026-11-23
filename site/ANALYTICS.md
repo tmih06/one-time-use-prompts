@@ -86,8 +86,17 @@ reach a deployed site.
 Visits come from Cloudflare Web Analytics, not PostHog, and are optional:
 
 1. Enable Web Analytics for the Pages project in the Cloudflare dashboard.
-2. Create an API token with Account Analytics read access, and note your account ID and the site's tag.
-3. Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`.
+2. Create an API token with Account Analytics read access and note your account ID.
+3. Find the site's tag. It is the `site_tag` of your site in the Web Analytics API, **not** the `site_token` inside the beacon
+   snippet. List your sites and copy the `site_tag` whose hostname matches (the token may also need
+   Account → Web Analytics → Read for this call):
+
+   ```bash
+   curl -s https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/rum/site_info/list \
+     -H "Authorization: Bearer <API_TOKEN>"
+   ```
+
+4. Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`.
 
 The GraphQL query in `src/lib/analytics.ts` (`VISITS_QUERY`) was written from Cloudflare's docs and has **not** been run
 against a real account. If it fails the build logs "Cloudflare query failed: ..." and the visits tile is left out; fix the
