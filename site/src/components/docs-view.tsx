@@ -100,10 +100,18 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
             source={page.source}
           />
           <DocsDescription>{page.description}</DocsDescription>
-          <DocsBody>
-            <MDX components={getMDXComponents()} />
-          </DocsBody>
-          <TweetCards tweets={tweets} />
+          <div
+            className={
+              tweets.length > 0
+                ? "items-start gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]"
+                : undefined
+            }
+          >
+            <DocsBody>
+              <MDX components={getMDXComponents()} />
+            </DocsBody>
+            <TweetCards tweets={tweets} />
+          </div>
         </DocsPage>
       </DocsLayout>
       <DrawerTemplate />
