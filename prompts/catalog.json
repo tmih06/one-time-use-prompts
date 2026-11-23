@@ -59,6 +59,20 @@
       "tags": ["fonts", "performance", "web-fonts", "subsetting", "frontend"],
       "author": "Shu (@shuding)",
       "source": "https://x.com/shuding/status/2115855028737200211"
+    },
+    {
+      "id": "audit-site-seo-geo",
+      "title": "Audit and Fix a Site's SEO and AI-Search (GEO) Readiness",
+      "description": "Once per site, when you want every public page brought into compliance with Google's SEO guidance plus AI-search readiness — route inventory, per-page 9-point audit, prioritized fixes, and verified SEO/GEO scores.",
+      "phase": "existing",
+      "purpose": "quality",
+      "one_time": true,
+      "tags": ["seo", "geo", "audit", "web", "agents"],
+      "author": "Umut Bayraktar (@umutxyp)",
+      "source": [
+        "https://x.com/DanKornas/status/2122795905602740651",
+        "https://github.com/umutxyp/Seo-Promt-Master"
+      ]
     }
   ]
 }
