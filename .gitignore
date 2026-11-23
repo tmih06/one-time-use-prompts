@@ -26,3 +26,4 @@ site/content/docs/*
 # Local scratch / notes
 scratch/
 *.local.md
+.venv-fonts/
