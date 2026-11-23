@@ -43,6 +43,9 @@
   --border: #16161812;
   --muted-foreground: #636368;
   --brand: #0071e3;
+  /* Chart series: the brand blue and tuffui's teal, validated against the card and well surfaces. */
+  --series-views: var(--brand);
+  --series-copies: #1a9e8c;
   --skullet-base: rgb(0 0 0 / 0.07);
   --skullet-highlight: rgb(255 255 255 / 0.6);
 }
@@ -56,6 +59,7 @@
   --border: #ffffff0f;
   --muted-foreground: #98989b;
   --brand: #0a84ff;
+  --series-copies: #1a9e8c;
   --skullet-base: rgb(255 255 255 / 0.08);
   --skullet-highlight: rgb(255 255 255 / 0.1);
 }
@@ -120,6 +124,15 @@ body {
 /* Wordmark */
 .font-logo {
   letter-spacing: 0.08em;
+}
+
+/* Diagonal hatch over a solid fill: progress bars and the live edge of a chart, as in tuffui. */
+.stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 3px,
+    rgb(255 255 255 / 0.22) 3px 6px
+  );
 }
 
 /* Press feedback on anything marked interactive, like Tuff's active:scale. */

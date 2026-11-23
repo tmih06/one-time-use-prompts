@@ -2,11 +2,13 @@ import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import type { Tweet } from "react-tweet/api";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { getMDXComponents } from "@/components/mdx";
+import { PromptUsage } from "@/components/analytics-panels";
 import { PromptActions } from "@/components/prompt-actions";
 import { PromptCard } from "@/components/prompt-card";
 import { PromptTags } from "@/components/prompt-tags";
 import { HomeShell } from "@/components/site-provider";
 import { TweetSourceCard } from "@/components/tweet-card";
+import { analytics } from "@/lib/analytics";
 import { PHASES, purposeTitle, type PromptSummary } from "@/lib/prompts";
 import { getSourceUrl } from "@/lib/shared";
 import { docs } from "@/lib/source";
@@ -63,7 +65,7 @@ export function PromptPage({
         data-purpose={page.purpose}
         className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6"
       >
-        <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="min-w-0">
             <header data-reveal>
               <Breadcrumb crumbs={crumbs} />
@@ -87,9 +89,11 @@ export function PromptPage({
             </DocsBody>
           </div>
           <aside data-reveal className="lg:self-stretch">
-            <div className="flex flex-col gap-6 lg:sticky lg:top-20">
+            {/* Sticks only when the whole column fits on screen; otherwise it scrolls with the page, never inside itself. */}
+            <div className="flex flex-col gap-6 lg:[@media(min-height:1020px)]:sticky lg:[@media(min-height:1020px)]:top-20">
               <PromptActions markdownUrl={markdownUrl} githubUrl={getSourceUrl(path)} />
               {tweet && <TweetSourceCard tweet={tweet} />}
+              {analytics && <PromptUsage snapshot={analytics} id={pathname.split("/").pop()!} />}
             </div>
           </aside>
         </div>

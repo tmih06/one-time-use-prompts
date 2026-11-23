@@ -44,6 +44,65 @@ Turnstile token and rate-limits by IP.
 
 ## Reading the numbers
 
-`import { analytics } from "@/lib/analytics"` gives `{ trending, daily, ... }` or `null` (no credentials, or the
-query failed). It is read once per build, so the numbers are as fresh as the last deploy; redeploy on a schedule
-to refresh them. Trending score is `viewers + 5 × copiers` over the last 7 days. Nothing renders it yet.
+`import { analytics } from "@/lib/analytics"` gives the snapshot below, or `null` when no read credentials are set or
+a query failed. It is read once per build, so the numbers are as fresh as the last deploy; redeploy on a schedule to
+refresh them.
+
+| Field       | What it is                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| `trending`  | Top prompts over 7 days, scored `viewers + 5 × copiers` (distinct visitors; see spam notes) |
+| `totals`    | Daily prompt views and copies for 30 days, plus `visits` from Cloudflare when configured    |
+| `perPrompt` | The same daily series per prompt                                                            |
+
+Events from `localhost` and `127.0.0.1` are excluded, so local testing never shows up as traffic.
+
+## Where it shows
+
+The panels and graphs render whenever the PostHog read credentials work, showing zeros and an empty trending list until
+traffic arrives. With no credentials (or a failed query) they are left out and the site looks as before.
+
+To see them filled in before there is real traffic, run the dev server with sample numbers:
+
+```bash
+ANALYTICS_SAMPLE=1 bun run dev
+```
+
+The sample data (`src/lib/analytics-sample.ts`) is only used by the dev server. A build ignores the flag, so it can't
+reach a deployed site.
+
+- **Home hero** (`components/analytics-panels.tsx`): two cards in the style of tuffui's components. "Trending" ranks the top
+  prompts of the week with striped bars; "Usage" is a 30-day line chart of prompt views and copies with a change
+  badge and Visits / Views / Copies tiles. On very wide screens (2xl) they sit in the empty space either side of the
+  headline; below that they stack under the buttons.
+- **Prompt cards** (`components/prompt-card.tsx`): a pill legend with the 14-day totals over a small line chart, in an
+  inset well. Both lines share one scale, so copies read as the smaller number they are.
+- **Colours:** views use the brand blue and copies tuffui's teal `#1a9e8c` (`--series-views`, `--series-copies` in
+  `app.css`). The pair passes the data-viz validator on the card and well surfaces in light and dark. The one warning
+  is teal on the light card surface (2.8:1), which the charts avoid by sitting in the inset wells, and the figures
+  are also printed as text.
+
+## Site visits (Cloudflare)
+
+Visits come from Cloudflare Web Analytics, not PostHog, and are optional:
+
+1. Enable Web Analytics for the Pages project in the Cloudflare dashboard.
+2. Create an API token with Account Analytics read access and note your account ID.
+3. Find the site's tag. It is the `site_tag` of your site in the Web Analytics API, **not** the `site_token` inside the beacon
+   snippet. List your sites and copy the `site_tag` whose hostname matches (the token may also need
+   Account → Web Analytics → Read for this call):
+
+   ```bash
+   curl -s https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/rum/site_info/list \
+     -H "Authorization: Bearer <API_TOKEN>"
+   ```
+
+4. Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`.
+
+The GraphQL query in `src/lib/analytics.ts` (`VISITS_QUERY`) was checked against a real account. Two things to know:
+
+- Cloudflare returns **no rows, with no error**, for a window longer than about 9 days, so the code asks for the 30 days in
+  chunks of 7 and merges them.
+- An account can hold more than one Web Analytics site for the same hostname (each has its own `site_tag`). Use the one
+  that is collecting your traffic; list them with the call above, or compare page loads per `siteTag` in the GraphQL API.
+
+If a query fails the build logs "Cloudflare query failed: ..." and the visits tile is left out. Everything else keeps working.
