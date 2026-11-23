@@ -44,6 +44,8 @@
   --border: #16161812;
   --muted-foreground: #636368;
   --brand: #0071e3;
+  --skullet-base: rgb(0 0 0 / 0.07);
+  --skullet-highlight: rgb(255 255 255 / 0.6);
 }
 
 .dark {
@@ -55,6 +57,8 @@
   --border: #ffffff0f;
   --muted-foreground: #98989b;
   --brand: #0a84ff;
+  --skullet-base: rgb(255 255 255 / 0.08);
+  --skullet-highlight: rgb(255 255 255 / 0.1);
 }
 
 /* Map the palette onto Fumadocs' tokens so its own components follow along. */
