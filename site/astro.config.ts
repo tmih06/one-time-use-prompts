@@ -25,7 +25,7 @@ export default defineConfig({
   server: { port: 3000 },
   devToolbar: { enabled: false },
   integrations: [react()],
-  prefetch: { prefetchAll: true, defaultStrategy: "hover" },
+  prefetch: { prefetchAll: true, defaultStrategy: "viewport" },
   // "file" output avoids the redirect Cloudflare Pages adds for directory indexes.
   build: { format: "file", inlineStylesheets: "always" },
   vite: {

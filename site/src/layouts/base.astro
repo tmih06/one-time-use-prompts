@@ -10,6 +10,12 @@ interface Props {
 }
 
 const { description, ogTitle, ogType, ogImage } = Astro.props;
+
+/** Chromium prerenders likely links so a click shows the next page instantly. */
+const speculationRules = {
+  prerender: [{ where: { and: [{ href_matches: "/*" }, { not: { href_matches: ["/api/*", "/og/*", "/*.md"] } }] }, eagerness: "moderate" }],
+  prefetch: [{ where: { and: [{ href_matches: "/*" }, { not: { href_matches: ["/api/*", "/og/*", "/*.md"] } }] }, eagerness: "eager" }],
+};
 ---
 
 <!doctype html>
@@ -22,6 +28,7 @@ const { description, ogTitle, ogType, ogImage } = Astro.props;
     {ogTitle && <meta property="og:title" content={ogTitle} />}
     {ogType && <meta property="og:type" content={ogType} />}
     {ogImage && <meta property="og:image" content={ogImage} />}
+    <script is:inline type="speculationrules" set:html={JSON.stringify(speculationRules)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/geist-core.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/orbitron-core.woff2" as="font" type="font/woff2" crossorigin />

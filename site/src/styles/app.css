@@ -154,10 +154,11 @@ body {
 }
 
 /*
- * Entrances. The head script sets data-motion; scripts/site.ts then reveals
- * each [data-reveal] as it enters the viewport, staggering siblings that
- * arrive together through --d. Without JS (or with reduced motion) nothing
- * is ever hidden.
+ * Entrances. Content is visible on first paint, never gated on JS. Only
+ * [data-reveal] elements that start below the fold get data-wait from
+ * scripts/site.ts; they rise in as they scroll into view, staggering siblings
+ * that arrive together through --d. Without JS (or with reduced motion)
+ * nothing is ever hidden.
  */
 @keyframes rise {
   from {
@@ -165,11 +166,11 @@ body {
     translate: 0 14px;
   }
 }
-html[data-motion] [data-reveal]:not([data-in]) {
+html[data-motion] [data-reveal][data-wait]:not([data-in]) {
   opacity: 0;
 }
 html[data-motion] [data-reveal][data-in] {
-  animation: rise 800ms var(--ease-arrive) var(--d, 0ms) backwards;
+  animation: rise 450ms var(--ease-arrive) var(--d, 0ms) backwards;
 }
 
 /*
@@ -301,7 +302,7 @@ nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
 
 /*
  * Page changes: a short crossfade between documents, with the header held
- * still so only the page moves (its own content rises in via data-reveal).
+ * still so only the page moves. Kept short so navigation never feels slow.
  */
 @view-transition {
   navigation: auto;
@@ -310,7 +311,7 @@ nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
   view-transition-name: site-header;
 }
 ::view-transition-group(root) {
-  animation-duration: 200ms;
+  animation-duration: 120ms;
 }
 
 /*

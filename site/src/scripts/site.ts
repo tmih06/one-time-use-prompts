@@ -219,9 +219,10 @@ if (!reducedMotion) {
 /* Entrances ----------------------------------------------------------------- */
 
 /**
- * Reveals each [data-reveal] as it enters the viewport. Items that arrive in
- * the same batch (the first screen, a row of cards scrolling in) cascade in
- * reading order, 70ms apart, so the page assembles instead of appearing.
+ * Items already on screen when the page loads are left alone, so navigation
+ * shows content immediately. Items below the fold are hidden and rise in as
+ * they enter the viewport; those arriving together (a row of cards) cascade
+ * in reading order, 50ms apart.
  */
 function initReveal() {
   const root = document.documentElement;
@@ -240,14 +241,18 @@ function initReveal() {
             a.boundingClientRect.left - b.boundingClientRect.left,
         );
       arriving.forEach(({ target }, i) => {
-        (target as HTMLElement).style.setProperty("--d", `${Math.min(i * 70, 420)}ms`);
+        (target as HTMLElement).style.setProperty("--d", `${Math.min(i * 50, 250)}ms`);
         target.setAttribute("data-in", "");
         observer.unobserve(target);
       });
     },
     { rootMargin: "0px 0px -6% 0px" },
   );
-  for (const el of items) observer.observe(el);
+  for (const el of items) {
+    if (el.getBoundingClientRect().top < innerHeight) continue; // on screen (or scrolled past): show now
+    el.setAttribute("data-wait", "");
+    observer.observe(el);
+  }
   root.setAttribute("data-motion-ready", "");
 }
 initReveal();
