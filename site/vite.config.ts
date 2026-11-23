@@ -49,7 +49,10 @@ export default defineConfig({
     }),
     react(),
     // please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
+    // Pin the preset: on Cloudflare Pages Nitro auto-detects `cloudflare-pages` (SSR worker in site/dist),
+    // but this site is deployed as static files from site/.output/public (see wrangler.jsonc).
     nitro({
+      preset: "node-server",
       prerender: { routes: nitroRoutes },
     }),
   ],
