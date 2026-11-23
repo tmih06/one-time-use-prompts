@@ -5,7 +5,11 @@ import Lenis from "lenis";
 const TRIGGER = "[data-search], [data-search-full]";
 const NESTED_SCROLLERS = ".fd-scroll-container, [role='dialog']";
 const CHECK_ICON =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>';
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check icon-pop"><path d="M20 6 9 17l-5-5"/></svg>';
+
+const EASE_TRAVEL = "cubic-bezier(0.45, 0, 0.1, 1)";
+const EASE_ARRIVE = "cubic-bezier(0.25, 0.8, 0.25, 1)";
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const isTyping = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
@@ -13,7 +17,18 @@ const isTyping = (target: EventTarget | null) =>
 
 /* Theme ------------------------------------------------------------------ */
 
-function toggleTheme() {
+/** Where the theme circle grows from: the visible toggle, else the top-right corner. */
+function themeOrigin(from?: Element | null) {
+  const el =
+    from ??
+    [...document.querySelectorAll<HTMLElement>("[data-theme-toggle]")].find((t) => t.offsetParent);
+  const box = el?.getBoundingClientRect();
+  return box
+    ? { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+    : { x: innerWidth - 32, y: 32 };
+}
+
+function toggleTheme(from?: Element | null) {
   const root = document.documentElement;
   const next = root.classList.contains("dark") ? "light" : "dark";
   const apply = () => {
@@ -29,8 +44,19 @@ function toggleTheme() {
     void getComputedStyle(root).opacity; // flush styles while transitions are off
     requestAnimationFrame(() => freeze.remove());
   };
-  if (document.startViewTransition) document.startViewTransition(apply);
-  else apply();
+  if (!document.startViewTransition || reducedMotion) return apply();
+
+  const { x, y } = themeOrigin(from);
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  root.setAttribute("data-theming", "");
+  const transition = document.startViewTransition(apply);
+  void transition.ready.then(() =>
+    root.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+      { duration: 600, easing: EASE_TRAVEL, pseudoElement: "::view-transition-new(root)" },
+    ),
+  );
+  void transition.finished.finally(() => root.removeAttribute("data-theming"));
 }
 
 /* Search (React loads only here) ------------------------------------------ */
@@ -53,6 +79,30 @@ function openSearch(toggle = false) {
 
 let menuPanel: HTMLElement | undefined;
 
+/** The panel grows from the header and folds back into it; its height is measured, never guessed. */
+function animateMenu(panel: HTMLElement, open: boolean) {
+  for (const running of panel.getAnimations()) running.cancel();
+  if (reducedMotion) {
+    panel.hidden = !open;
+    return;
+  }
+  if (open) {
+    panel.hidden = false;
+    panel.animate(
+      { height: ["0px", `${panel.scrollHeight}px`], opacity: [0, 1] },
+      { duration: 320, easing: EASE_ARRIVE },
+    );
+  } else {
+    const fold = panel.animate(
+      { height: [`${panel.offsetHeight}px`, "0px"], opacity: [1, 0] },
+      { duration: 200, easing: EASE_TRAVEL },
+    );
+    fold.onfinish = () => {
+      if (!document.getElementById("nd-nav")?.hasAttribute("data-open")) panel.hidden = true;
+    };
+  }
+}
+
 function setMenu(open: boolean) {
   const header = document.getElementById("nd-nav");
   const nav = header?.querySelector("nav");
@@ -73,7 +123,7 @@ function setMenu(open: boolean) {
     if (theme) row.append(theme);
     nav.append(menuPanel);
   }
-  if (menuPanel) menuPanel.hidden = !open;
+  if (menuPanel) animateMenu(menuPanel, open);
   header.toggleAttribute("data-open", open);
   header.toggleAttribute("data-closed", !open);
   nav.classList.toggle("max-lg:shadow-lg", open);
@@ -91,7 +141,9 @@ function flashCopied(button: HTMLElement) {
   icon.outerHTML = CHECK_ICON;
   button.toggleAttribute("data-checked", true);
   setTimeout(() => {
-    button.querySelector("svg")!.outerHTML = original;
+    const check = button.querySelector("svg")!;
+    check.outerHTML = original;
+    button.querySelector("svg")?.classList.add("icon-pop");
     button.removeAttribute("data-checked");
   }, 1500);
 }
@@ -118,7 +170,7 @@ document.addEventListener("click", (event) => {
 
   const button = target.closest<HTMLElement>("button");
   if (!button) return;
-  if (button.matches("[data-theme-toggle]")) return toggleTheme();
+  if (button.matches("[data-theme-toggle]")) return toggleTheme(button);
   if (button.matches(TRIGGER)) return openSearch();
 
   if (button.getAttribute("aria-label") === "Toggle Menu") return setMenu(!menuOpen);
@@ -168,10 +220,54 @@ if (import.meta.env.DEV) void import("./dev-tools");
 
 // Imported statically so Lenis ships in the hashed, immutable-cached site bundle
 // every page loads and starts right away, instead of fetching a chunk at idle.
-if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+if (!reducedMotion) {
   new Lenis({
     autoRaf: true,
+    anchors: true,
     lerp: 0.1,
     prevent: (node) => node.closest(NESTED_SCROLLERS) !== null,
   });
 }
+
+/* Entrances ----------------------------------------------------------------- */
+
+/**
+ * Reveals each [data-reveal] as it enters the viewport. Items that arrive in
+ * the same batch (the first screen, a row of cards scrolling in) cascade in
+ * reading order, 70ms apart, so the page assembles instead of appearing.
+ */
+function initReveal() {
+  const root = document.documentElement;
+  const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
+  if (!root.hasAttribute("data-motion")) {
+    for (const el of items) el.setAttribute("data-in", "");
+    return;
+  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const arriving = entries
+        .filter((e) => e.isIntersecting)
+        .sort(
+          (a, b) =>
+            a.boundingClientRect.top - b.boundingClientRect.top ||
+            a.boundingClientRect.left - b.boundingClientRect.left,
+        );
+      arriving.forEach(({ target }, i) => {
+        (target as HTMLElement).style.setProperty("--d", `${Math.min(i * 70, 420)}ms`);
+        target.setAttribute("data-in", "");
+        observer.unobserve(target);
+      });
+    },
+    { rootMargin: "0px 0px -6% 0px" },
+  );
+  for (const el of items) observer.observe(el);
+  root.setAttribute("data-motion-ready", "");
+}
+initReveal();
+
+/* The header gets a hairline once the page has scrolled under it. */
+function markScrolled() {
+  document.getElementById("nd-nav")?.toggleAttribute("data-scrolled", scrollY > 8);
+}
+addEventListener("scroll", markScrolled, { passive: true });
+markScrolled();

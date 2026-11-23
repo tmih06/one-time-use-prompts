@@ -80,7 +80,7 @@ export function Gallery({ prompts, phase, purpose }: GalleryProps) {
   return (
     <HomeShell pathname={pathname}>
       <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6">
-        <header className="pt-10 sm:pt-14">
+        <header data-reveal className="pt-10 sm:pt-14">
           <Breadcrumb crumbs={crumbs} />
           <div>
             <div className="max-w-2xl">
@@ -98,7 +98,7 @@ export function Gallery({ prompts, phase, purpose }: GalleryProps) {
           </div>
         </header>
 
-        <div className="mt-8 flex flex-col gap-3">
+        <div data-reveal className="mt-8 flex flex-col gap-3">
           <div className="flex flex-col gap-3">
             <nav aria-label="Phase" className="flex flex-wrap gap-2">
               <Pill href="/docs" active={!phase} label="All" n={prompts.length} />
@@ -146,11 +146,12 @@ export function Gallery({ prompts, phase, purpose }: GalleryProps) {
               href={contributingUrl}
               target="_blank"
               rel="noreferrer"
-              className={`press group flex min-h-48 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
+              data-reveal
+              className={`press lift group flex min-h-48 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
             >
               <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-fd-border px-6 py-8 text-center">
                 <span className="inline-flex size-10 items-center justify-center rounded-full bg-foreground/[0.06]">
-                  <Plus className="size-5" />
+                  <Plus className="size-5 transition-transform duration-300 ease-[var(--ease-arrive)] group-hover:rotate-90" />
                 </span>
                 <div>
                   <p className="font-medium">Contribute yours</p>

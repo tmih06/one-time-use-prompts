@@ -10,23 +10,27 @@ export function PromptCard({ prompt: p }: { prompt: PromptSummary }) {
   return (
     <a
       href={`/docs/${p.splat}`}
-      className={`press group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
+      data-reveal
+      className={`press lift group flex min-w-0 flex-col ${shell} hover:bg-[color-mix(in_oklab,var(--surface),var(--foreground)_5%)]`}
     >
       <div className="relative flex aspect-[16/10] flex-col overflow-hidden rounded-2xl bg-surface-inset p-4 font-mono text-[11px] leading-relaxed [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">
-        {p.preview.map((line, i) => (
-          <span
-            key={i}
-            className={
-              line.startsWith("#")
-                ? "text-brand"
-                : line.startsWith(">")
-                  ? "text-muted-foreground"
-                  : "text-foreground/80"
-            }
-          >
-            {line || "\u00a0"}
-          </span>
-        ))}
+        {/* The preview drifts up a few pixels on hover, hinting there's more below the fade. */}
+        <div className="flex flex-col transition-transform duration-500 ease-[var(--ease-arrive)] group-hover:-translate-y-2">
+          {p.preview.map((line, i) => (
+            <span
+              key={i}
+              className={
+                line.startsWith("#")
+                  ? "text-brand"
+                  : line.startsWith(">")
+                    ? "text-muted-foreground"
+                    : "text-foreground/80"
+              }
+            >
+              {line || "\u00a0"}
+            </span>
+          ))}
+        </div>
       </div>
       <div className="flex flex-1 flex-col gap-1 px-3 pb-2.5 pt-3">
         <h3 className="flex min-w-0 items-center gap-2 font-medium">

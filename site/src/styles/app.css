@@ -124,10 +124,118 @@ body {
   transition:
     background-color 150ms var(--ease-out, ease-out),
     color 150ms,
-    scale 150ms var(--ease-out, ease-out);
+    scale 150ms var(--ease-out, ease-out),
+    translate 300ms var(--ease-arrive);
 }
 .press:active {
   scale: 0.97;
+}
+
+/*
+ * Motion. Two curves: `travel` for things that move between places, `arrive`
+ * for things that appear from nowhere. Feedback to input stays quick (150ms);
+ * only storytelling motion (entrances, page changes) is slower. Everything
+ * here is off under prefers-reduced-motion.
+ */
+:root {
+  --ease-travel: cubic-bezier(0.45, 0, 0.1, 1);
+  --ease-arrive: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-feedback: cubic-bezier(0.3, 0.75, 0.1, 1);
+}
+
+/* Cards that can be opened rise a touch toward the pointer. */
+@media (hover: hover) and (pointer: fine) {
+  .press.lift:hover {
+    translate: 0 -2px;
+  }
+}
+
+/*
+ * Entrances. The head script sets data-motion; scripts/site.ts then reveals
+ * each [data-reveal] as it enters the viewport, staggering siblings that
+ * arrive together through --d. Without JS (or with reduced motion) nothing
+ * is ever hidden.
+ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+html[data-motion] [data-reveal]:not([data-in]) {
+  opacity: 0;
+}
+html[data-motion] [data-reveal][data-in] {
+  animation: rise 800ms var(--ease-arrive) var(--d, 0ms) backwards;
+}
+
+/* A new state's icon (copied check, restored copy) arrives with a small pop. */
+@keyframes icon-pop {
+  from {
+    opacity: 0;
+    scale: 0.5;
+    rotate: -24deg;
+  }
+}
+.icon-pop {
+  animation: icon-pop 350ms var(--ease-feedback);
+}
+
+/* The header gains a hairline once the page scrolls under it. */
+#nd-nav {
+  transition: border-color 250ms var(--ease-arrive);
+}
+#nd-nav[data-scrolled] {
+  border-bottom-color: var(--border);
+}
+#nd-nav nav {
+  transition:
+    box-shadow 250ms var(--ease-arrive),
+    border-radius 250ms var(--ease-arrive);
+}
+
+/*
+ * Page changes: a short crossfade between documents, with the header held
+ * still so only the page moves (its own content rises in via data-reveal).
+ */
+@view-transition {
+  navigation: auto;
+}
+#nd-nav {
+  view-transition-name: site-header;
+}
+::view-transition-group(root) {
+  animation-duration: 200ms;
+}
+
+/* The theme switch is a circle growing from the toggle that was pressed. */
+html[data-theming]::view-transition-old(root),
+html[data-theming]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theming]::view-transition-old(root) {
+  z-index: 1;
+}
+html[data-theming]::view-transition-new(root) {
+  z-index: 2;
+}
+html[data-theming] #nd-nav {
+  view-transition-name: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  .press,
+  .press:active {
+    transition-property: background-color, color;
+    scale: none;
+  }
+  .icon-pop {
+    animation: none;
+  }
 }
 
 /*

@@ -24,7 +24,7 @@ const { description, ogTitle, ogType, ogImage } = Astro.props;
     {ogTitle && <meta property="og:title" content={ogTitle} />}
     {ogType && <meta property="og:type" content={ogType} />}
     {ogImage && <meta property="og:image" content={ogImage} />}
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href={geistFont} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={orbitronFont} as="font" type="font/woff2" crossorigin />
     <script is:inline>
@@ -38,6 +38,14 @@ const { description, ogTitle, ogType, ogImage } = Astro.props;
           theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         document.documentElement.classList.add(theme);
         document.documentElement.style.colorScheme = theme;
+        // Entrance motion is on until scripts/site.ts takes over; if it never does, show everything.
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          document.documentElement.setAttribute("data-motion", "");
+          setTimeout(() => {
+            if (!document.documentElement.hasAttribute("data-motion-ready"))
+              document.documentElement.removeAttribute("data-motion");
+          }, 3000);
+        }
       })();
     </script>
   </head>

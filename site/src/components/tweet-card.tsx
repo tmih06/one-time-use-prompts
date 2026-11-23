@@ -41,7 +41,7 @@ export function TweetSourceCard({ tweet, className = "" }: { tweet: Tweet; class
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="press group block rounded-2xl bg-surface p-4 hover:bg-surface-raised"
+        className="press lift group block rounded-2xl bg-surface p-4 hover:bg-surface-raised"
       >
         <p className="line-clamp-5 whitespace-pre-line text-[0.9375rem] leading-relaxed text-foreground">
           {bodyOf(tweet)}

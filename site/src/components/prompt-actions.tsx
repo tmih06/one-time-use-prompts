@@ -84,7 +84,7 @@ export function PromptActions({ markdownUrl, githubUrl }: PromptActionsProps) {
                     {link.icon}
                   </span>
                   <span className="flex-1 truncate">{link.title}</span>
-                  <ArrowUpRight className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  <ArrowUpRight className="-translate-x-0.5 translate-y-0.5 text-muted-foreground opacity-0 transition-[opacity,translate] duration-300 ease-[var(--ease-arrive)] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />
                 </a>
               </li>
             ))}

@@ -60,7 +60,7 @@ export function PromptPage({
       <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6">
         <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="min-w-0">
-            <header>
+            <header data-reveal>
               <Breadcrumb crumbs={crumbs} />
               <h1 className="max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
                 {page.title}
@@ -77,11 +77,11 @@ export function PromptPage({
                 source={sourceChips}
               />
             </header>
-            <DocsBody className="mt-8">
+            <DocsBody data-reveal className="mt-8">
               <MDX components={getMDXComponents()} />
             </DocsBody>
           </div>
-          <aside className="lg:self-stretch">
+          <aside data-reveal className="lg:self-stretch">
             <div className="flex flex-col gap-6 lg:sticky lg:top-20">
               <PromptActions markdownUrl={markdownUrl} githubUrl={getSourceUrl(path)} />
               {tweet && <TweetSourceCard tweet={tweet} />}
@@ -91,7 +91,11 @@ export function PromptPage({
 
         {related.length > 0 && (
           <section className="mt-16" aria-labelledby="more-prompts">
-            <h2 id="more-prompts" className="mb-6 text-2xl font-semibold tracking-tight">
+            <h2
+              id="more-prompts"
+              data-reveal
+              className="mb-6 text-2xl font-semibold tracking-tight"
+            >
               More prompts
             </h2>
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3">
