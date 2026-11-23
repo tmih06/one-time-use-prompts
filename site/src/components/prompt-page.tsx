@@ -65,7 +65,7 @@ export function PromptPage({
         data-purpose={page.purpose}
         className="mx-auto w-full max-w-[90rem] flex-1 px-4 pb-16 sm:px-6"
       >
-        <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="grid gap-x-10 gap-y-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="min-w-0">
             <header data-reveal>
               <Breadcrumb crumbs={crumbs} />
@@ -89,11 +89,8 @@ export function PromptPage({
             </DocsBody>
           </div>
           <aside data-reveal className="lg:self-stretch">
-            {/* Taller than a short screen once usage is added, so it scrolls inside itself while it sticks. */}
-            <div
-              data-lenis-prevent
-              className="flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-width:thin]"
-            >
+            {/* Sticks only when the whole column fits on screen; otherwise it scrolls with the page, never inside itself. */}
+            <div className="flex flex-col gap-6 lg:[@media(min-height:1020px)]:sticky lg:[@media(min-height:1020px)]:top-20">
               <PromptActions markdownUrl={markdownUrl} githubUrl={getSourceUrl(path)} />
               {tweet && <TweetSourceCard tweet={tweet} />}
               {analytics && <PromptUsage snapshot={analytics} id={pathname.split("/").pop()!} />}
