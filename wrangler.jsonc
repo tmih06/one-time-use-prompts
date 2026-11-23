@@ -1,5 +1,5 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "one-time-use-prompts",
-  "pages_build_output_dir": "site/dist"
+  "pages_build_output_dir": "site/dist",
 }

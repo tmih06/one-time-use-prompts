@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prompts:
+    name: Prompt library
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate catalog against prompt files
+        run: python3 scripts/validate-catalog.py
+
+      - name: Scan prompts for injection patterns
+        run: python3 scripts/scan-prompt-injection.py
+
+  site:
+    name: Check, typecheck, audit, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      # vp and wrangler are node CLIs; setup-node also caches the bun install cache.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: bun
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Regenerates site/content/docs — the fumadocs macro in src/lib/source.ts
+      # reads it at type-check time, so it must exist before check/typecheck.
+      - name: Sync prompt content
+        run: bun run sync
+
+      - name: Format, lint, type-aware check
+        run: bun run check
+
+      - name: Typecheck (tsc, root + site)
+        run: bun run typecheck
+
+      - name: Build site
+        run: bun run build
+
+      - name: Audit dependencies
+        run: bun audit

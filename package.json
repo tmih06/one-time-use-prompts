@@ -13,10 +13,11 @@
     "preview": "bun run --cwd site preview",
     "deploy": "bun run build && bunx wrangler pages deploy",
     "sync": "bun run scripts/sync-prompts.ts",
-    "lint": "vp lint --type-aware --type-check",
-    "fmt": "vp fmt '!prompts/**'",
-    "check": "vp check '!prompts/**' && vp lint --type-aware --type-check",
-    "typecheck": "tsc --noEmit && bun run --cwd site types:check"
+    "lint": "vp lint",
+    "fmt": "vp fmt",
+    "check": "vp check",
+    "typecheck": "tsc --noEmit && bun run --cwd site types:check",
+    "validate:prompts": "python3 scripts/validate-catalog.py && python3 scripts/scan-prompt-injection.py"
   },
   "devDependencies": {
     "@types/bun": "^1.4.5",
