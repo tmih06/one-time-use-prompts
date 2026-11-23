@@ -1,4 +1,5 @@
 import { source } from "@/lib/source";
+import { fetchTweets } from "@/lib/tweet";
 
 export interface PromptSummary {
   splat: string;
@@ -9,6 +10,7 @@ export interface PromptSummary {
   purpose: string;
   tags: string[];
   preview: string[];
+  author?: string;
 }
 
 export const PHASES = [
@@ -25,6 +27,23 @@ export const PHASES = [
     blurb: "Working on a live codebase — quality, security, docs, operations and maintenance.",
   },
 ] as const;
+
+/**
+ * Handles of source-tweet authors that X shows a verified tick for, looked up
+ * once at build time (the tweet is already fetched for its prompt page).
+ */
+const verifiedHandles = new Set<string>();
+await Promise.all(
+  source.getPages().map(async (page) => {
+    for (const { user } of await fetchTweets(page.data.source)) {
+      if (user.is_blue_verified || user.verified)
+        verifiedHandles.add(user.screen_name.toLowerCase());
+    }
+  }),
+);
+
+export const isVerifiedHandle = (handle?: string) =>
+  !!handle && verifiedHandles.has(handle.toLowerCase());
 
 export const count = (n: number) => `${n} prompt${n === 1 ? "" : "s"}`;
 
@@ -44,6 +63,7 @@ export function getPrompts(): PromptSummary[] {
       purpose: page.slugs[1],
       tags: page.data.tags ?? [],
       preview: page.data.preview ?? [],
+      author: page.data.author,
     }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { AuthorLine } from "@/components/prompt-author";
 import { hue } from "@/components/prompt-tags";
 import type { PromptSummary } from "@/lib/prompts";
 
@@ -53,9 +54,13 @@ export function PromptCard({ prompt: p }: { prompt: PromptSummary }) {
             )}
           </ul>
         )}
-        <p className="mt-auto pt-2 text-[0.8125rem] capitalize text-muted-foreground/80">
-          {p.phase} · {p.purpose}
-        </p>
+        {p.author ? (
+          <AuthorLine author={p.author} className="mt-auto pt-2" />
+        ) : (
+          <p className="mt-auto pt-2 text-[0.8125rem] capitalize text-muted-foreground/80">
+            {p.phase} · {p.purpose}
+          </p>
+        )}
       </div>
     </a>
   );
