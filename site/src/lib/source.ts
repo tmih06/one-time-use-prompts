@@ -14,6 +14,8 @@ export const docs = defineDocs({
       phase: z.string().optional(),
       purpose: z.string().optional(),
       tags: z.array(z.string()).optional(),
+      // First lines of the prompt, for the home page cards (see scripts/sync-prompts.ts).
+      preview: z.array(z.string()).optional(),
       author: z.string().optional(),
       source: z.array(z.string()).optional(),
     }),

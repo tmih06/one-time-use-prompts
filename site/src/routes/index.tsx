@@ -33,40 +33,24 @@ const PHASES = [
   },
 ] as const;
 
-// Page metadata is already bundled with `source`, so this runs the same on the
-// server (prerender) and in the SPA shell — no static server-fn cache needed.
-async function getPrompts(): Promise<PromptSummary[]> {
-  const pages = await Promise.all(
-    source
-      .getPages()
-      .filter((page) => page.slugs.length === 3)
-      .map(async (page) => ({
-        splat: page.slugs.join("/"),
-        id: page.slugs[2],
-        title: page.data.title,
-        description: page.data.description ?? "",
-        phase: page.slugs[0],
-        purpose: page.slugs[1],
-        tags: page.data.tags ?? [],
-        preview: promptTop(await page.data.getText("processed")),
-      })),
-  );
-  return pages.sort((a, b) => a.title.localeCompare(b.title));
-}
-
-/**
- * First lines of the prompt itself: the processed markdown is the prompt
- * wrapped in a ```markdown fence, so strip fences and blank padding.
- */
-const PREVIEW_LINES = 9;
-function promptTop(markdown: string): string[] {
-  return markdown
-    .split("\n")
-    .filter((line) => !line.startsWith("```"))
-    .join("\n")
-    .trim()
-    .split("\n")
-    .slice(0, PREVIEW_LINES);
+// Page metadata (including the preview lines) is already bundled with `source`, so
+// this runs the same on the server (prerender) and in the SPA shell — no markdown
+// rendering (server-only in fumadocs) and no static server-fn cache needed.
+function getPrompts(): PromptSummary[] {
+  return source
+    .getPages()
+    .filter((page) => page.slugs.length === 3)
+    .map((page) => ({
+      splat: page.slugs.join("/"),
+      id: page.slugs[2],
+      title: page.data.title,
+      description: page.data.description ?? "",
+      phase: page.slugs[0],
+      purpose: page.slugs[1],
+      tags: page.data.tags ?? [],
+      preview: page.data.preview ?? [],
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export const Route = createFileRoute("/")({

@@ -55,6 +55,18 @@ const PURPOSE_TITLES: Record<string, string> = {
 
 const yaml = (v: string): string => JSON.stringify(v);
 
+/** First lines of the prompt itself (no code fences), shown in the home page cards. */
+const PREVIEW_LINES = 9;
+function promptTop(markdown: string): string[] {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("```"))
+    .join("\n")
+    .trim()
+    .split("\n")
+    .slice(0, PREVIEW_LINES);
+}
+
 async function main(): Promise<void> {
   const catalog = (await Bun.file(CATALOG).json()) as Catalog;
   const entries = [...catalog.prompts].sort((a, b) => a.id.localeCompare(b.id));
@@ -112,6 +124,7 @@ async function main(): Promise<void> {
         `phase: ${yaml(entry.phase)}`,
         `purpose: ${yaml(entry.purpose)}`,
         `tags: ${JSON.stringify(entry.tags)}`,
+        `preview: ${JSON.stringify(promptTop(bodies.get(entry.id)!))}`,
         ...(entry.author ? [`author: ${yaml(entry.author)}`] : []),
         ...(entry.source === undefined
           ? []
