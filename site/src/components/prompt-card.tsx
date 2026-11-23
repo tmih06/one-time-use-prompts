@@ -1,10 +1,41 @@
 import type { CSSProperties } from "react";
 import { AuthorLine } from "@/components/prompt-author";
+import { LegendPill, UsageChart } from "@/components/usage-chart";
 import { hue } from "@/components/prompt-tags";
+import { formatCount } from "@/lib/analytics";
 import { formatDate, type PromptSummary } from "@/lib/prompts";
 
 /** The layered "shell around an inset well" card recipe used across the site. */
 export const shell = "rounded-[1.375rem] bg-surface p-1.5";
+
+/** Views and copies over the last two weeks, in tuffui's chart style: pill legend over a small line chart. */
+function CardUsage({ stats }: { stats: NonNullable<PromptSummary["stats"]> }) {
+  const label = `Last ${stats.days} days: ${stats.totalViews} views, ${stats.totalCopies} copies`;
+  return (
+    <div className="mt-auto pt-2">
+      <div className="rounded-xl bg-surface-inset p-2.5" title={`Last ${stats.days} days`}>
+        <div className="flex gap-1.5">
+          <LegendPill color="var(--series-views)">
+            <span className="font-mono tabular-nums">{formatCount(stats.totalViews)}</span> views
+          </LegendPill>
+          <LegendPill color="var(--series-copies)">
+            <span className="font-mono tabular-nums">{formatCount(stats.totalCopies)}</span> copies
+          </LegendPill>
+        </div>
+        <UsageChart
+          className="mt-2"
+          width={300}
+          height={44}
+          label={label}
+          series={[
+            { values: stats.views, color: "var(--series-views)" },
+            { values: stats.copies, color: "var(--series-copies)" },
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
 
 /** Gallery card: a fading preview of the prompt file, then title, blurb and tags. */
 export function PromptCard({ prompt: p, hidden }: { prompt: PromptSummary; hidden?: boolean }) {
@@ -58,10 +89,17 @@ export function PromptCard({ prompt: p, hidden }: { prompt: PromptSummary; hidde
             )}
           </ul>
         )}
+        {p.stats && <CardUsage stats={p.stats} />}
         {p.author ? (
-          <AuthorLine author={p.author} updated={p.updated} className="mt-auto pt-2" />
+          <AuthorLine
+            author={p.author}
+            updated={p.updated}
+            className={`${p.stats ? "" : "mt-auto"} pt-2`}
+          />
         ) : (
-          <p className="mt-auto flex items-center justify-between gap-2 pt-2 text-[0.8125rem] text-muted-foreground/80">
+          <p
+            className={`${p.stats ? "" : "mt-auto"} flex items-center justify-between gap-2 pt-2 text-[0.8125rem] text-muted-foreground/80`}
+          >
             <span className="capitalize">
               {p.phase} · {p.purpose}
             </span>

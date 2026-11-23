@@ -1,4 +1,5 @@
 import { source } from "@/lib/source";
+import { analytics } from "@/lib/analytics";
 import { fetchTweets } from "@/lib/tweet";
 
 export interface PromptSummary {
@@ -13,6 +14,35 @@ export interface PromptSummary {
   author?: string;
   /** ISO date the prompt file last changed. */
   updated?: string;
+  /** Recent usage; absent until analytics has recorded something. */
+  stats?: PromptStats;
+}
+
+export interface PromptStats {
+  /** Daily values for the last `days` days, oldest first. */
+  views: number[];
+  copies: number[];
+  totalViews: number;
+  totalCopies: number;
+  days: number;
+}
+
+/** Days of usage shown on a prompt card. */
+const CARD_DAYS = 14;
+
+function statsFor(id: string): PromptStats | undefined {
+  if (!analytics) return undefined;
+  const series = analytics.perPrompt[id];
+  const views = (series?.views ?? analytics.days.map(() => 0)).slice(-CARD_DAYS);
+  const copies = (series?.copies ?? analytics.days.map(() => 0)).slice(-CARD_DAYS);
+  const total = (values: number[]) => values.reduce((a, b) => a + b, 0);
+  return {
+    views,
+    copies,
+    totalViews: total(views),
+    totalCopies: total(copies),
+    days: views.length,
+  };
 }
 
 export const PHASES = [
@@ -75,6 +105,7 @@ export function getPrompts(): PromptSummary[] {
       preview: page.data.preview ?? [],
       author: page.data.author,
       updated: page.data.updated,
+      stats: statsFor(page.slugs[2]),
     }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }

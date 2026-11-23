@@ -1,6 +1,8 @@
 import { ArrowRight, Plus } from "lucide-react";
+import { HeroAnalytics } from "@/components/analytics-panels";
 import { PromptCard, shell } from "@/components/prompt-card";
 import { HomeShell } from "@/components/site-provider";
+import { analytics } from "@/lib/analytics";
 import { count, PHASES, type PromptSummary } from "@/lib/prompts";
 import { contributingUrl } from "@/lib/shared";
 
@@ -13,7 +15,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
       <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 sm:px-6">
         <section className="pt-4">
           <div className={shell}>
-            <div className="flex flex-col items-center rounded-2xl bg-surface-inset px-4 py-20 text-center sm:px-6 sm:py-28">
+            <div className="relative flex flex-col items-center rounded-2xl bg-surface-inset px-4 py-20 text-center sm:px-6 sm:py-28">
               <span
                 data-reveal
                 className="mb-6 inline-flex h-8 items-center gap-2 rounded-full bg-foreground/[0.06] ps-1 pe-3 text-[0.8125rem] text-muted-foreground"
@@ -51,6 +53,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
                   Contribute yours
                 </a>
               </div>
+              {analytics && <HeroAnalytics snapshot={analytics} prompts={prompts} />}
             </div>
           </div>
         </section>
