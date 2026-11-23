@@ -20,6 +20,20 @@
       "tags": ["ci", "performance", "testing", "bun"],
       "author": "Pontus Abrahamsson (@pontusab)",
       "source": "https://x.com/pontusab/status/2123771160261529982"
+    },
+    {
+      "id": "untangle-codebase",
+      "title": "Untangle Codebase",
+      "description": "Once per codebase, when it has grown tangled — a one-pass structural refactor so a typical change lands in one place and agents working in it break less.",
+      "phase": "existing",
+      "purpose": "maintenance",
+      "one_time": true,
+      "tags": ["refactoring", "tech-debt", "architecture", "agents"],
+      "author": "Maze (@mazeincoding)",
+      "source": [
+        "https://x.com/mazeincoding/status/2118378945557004477",
+        "https://github.com/caldoai/skills/blob/main/skills/untangle-codebase/SKILL.md"
+      ]
     }
   ]
 }
