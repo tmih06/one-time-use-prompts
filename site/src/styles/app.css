@@ -262,6 +262,38 @@ figure.shiki .fd-scroll-container {
 }
 
 /*
+ * Tweet cards: retheme react-tweet's EmbeddedTweet onto the site tokens —
+ * borderless surface, Geist type, quieter metrics — and keep it narrower
+ * than the article column. `--tweet-*` vars are consumed by the component's
+ * CSS modules; both light and dark palettes resolve through our own vars.
+ */
+.tweet-card {
+  --tweet-font-family: var(--font-sans);
+  --tweet-font-color: var(--foreground);
+  --tweet-font-color-secondary: var(--muted-foreground);
+  --tweet-bg-color: var(--surface);
+  --tweet-bg-color-hover: var(--surface-raised);
+  --tweet-border: none;
+  --tweet-container-margin: 0;
+  --tweet-body-font-size: 1rem;
+  --tweet-body-line-height: 1.5rem;
+  --tweet-quoted-body-font-size: 0.9375rem;
+  --tweet-header-font-size: 0.9375rem;
+  --tweet-info-font-size: 0.875rem;
+  --tweet-actions-font-size: 0.8125rem;
+  --tweet-replies-font-size: 0.875rem;
+  --tweet-color-blue-primary: var(--brand);
+  --tweet-verified-blue-color: var(--brand);
+  --tweet-twitter-icon-color: var(--muted-foreground);
+}
+
+/* The component's own .root is a single-class selector; :first-child outranks it. */
+.tweet-card > :first-child {
+  max-width: 30rem;
+  border-radius: var(--radius-2xl);
+}
+
+/*
  * Long prompts: cap the block's height and scroll inside it with a slim bar,
  * and wrap long lines instead of scrolling sideways. Fumadocs sets the `pre`
  * to `w-max` (so it can overflow horizontally); pin it to the container
