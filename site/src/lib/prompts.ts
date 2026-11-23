@@ -56,7 +56,8 @@ export const PHASES = [
     slug: "existing",
     title: "Existing",
     kicker: "Brownfield",
-    blurb: "Working on a live codebase — quality, security, docs, operations, maintenance and polish.",
+    blurb:
+      "Working on a live codebase — quality, security, docs, operations, maintenance and polish.",
   },
 ] as const;
 

@@ -55,13 +55,13 @@ intent. The current folders are:
 
 ### Existing (`prompts/existing/`)
 
-| Folder           | Use for                                              |
-| ---------------- | ---------------------------------------------------- |
-| `quality/`       | CI/CD, testing, linting, code quality                |
-| `security/`      | Security audits, dependency reviews, threat modeling |
-| `documentation/` | README, architecture docs, onboarding guides         |
-| `operations/`    | Observability, performance, deployment, monitoring   |
-| `maintenance/`   | Technical debt, refactoring, upgrades, cleanup       |
+| Folder           | Use for                                               |
+| ---------------- | ----------------------------------------------------- |
+| `quality/`       | CI/CD, testing, linting, code quality                 |
+| `security/`      | Security audits, dependency reviews, threat modeling  |
+| `documentation/` | README, architecture docs, onboarding guides          |
+| `operations/`    | Observability, performance, deployment, monitoring    |
+| `maintenance/`   | Technical debt, refactoring, upgrades, cleanup        |
 | `polish/`        | Fit-and-finish UI passes: visuals, copy, states, a11y |
 
 If a prompt does not fit an existing folder, propose a new one in the PR and explain why.
