@@ -38,11 +38,17 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      # vp and wrangler are node CLIs; setup-node also caches the bun install cache.
+      # vp and wrangler are node CLIs, so a node runtime must be on PATH.
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: bun
+
+      # setup-bun caches the bun binary only; cache the package cache ourselves.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
