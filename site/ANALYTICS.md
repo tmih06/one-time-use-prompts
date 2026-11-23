@@ -98,6 +98,11 @@ Visits come from Cloudflare Web Analytics, not PostHog, and are optional:
 
 4. Set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`.
 
-The GraphQL query in `src/lib/analytics.ts` (`VISITS_QUERY`) was written from Cloudflare's docs and has **not** been run
-against a real account. If it fails the build logs "Cloudflare query failed: ..." and the visits tile is left out; fix the
-field names there. Everything else keeps working.
+The GraphQL query in `src/lib/analytics.ts` (`VISITS_QUERY`) was checked against a real account. Two things to know:
+
+- Cloudflare returns **no rows, with no error**, for a window longer than about 9 days, so the code asks for the 30 days in
+  chunks of 7 and merges them.
+- An account can hold more than one Web Analytics site for the same hostname (each has its own `site_tag`). Use the one
+  that is collecting your traffic; list them with the call above, or compare page loads per `siteTag` in the GraphQL API.
+
+If a query fails the build logs "Cloudflare query failed: ..." and the visits tile is left out. Everything else keeps working.

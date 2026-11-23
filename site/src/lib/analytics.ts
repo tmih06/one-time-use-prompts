@@ -140,35 +140,46 @@ interface VisitsResponse {
   errors?: { message: string }[];
 }
 
+/**
+ * Cloudflare quietly returns no rows for a window longer than about 9 days (no error),
+ * so ask for the days in chunks of at most a week and merge them.
+ */
+const VISITS_CHUNK_DAYS = 7;
+
 async function fetchVisits(days: string[]): Promise<number[] | null> {
   const account = env("CLOUDFLARE_ACCOUNT_ID");
   const token = env("CLOUDFLARE_API_TOKEN");
   const site = env("CLOUDFLARE_WEB_ANALYTICS_SITE_TAG");
   if (!account || !token || !site) return null;
-  try {
-    const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        query: VISITS_QUERY,
-        variables: {
-          account,
-          site,
-          since: `${days[0]}T00:00:00Z`,
-          until: new Date().toISOString(),
-        },
-      }),
-      signal: AbortSignal.timeout(15000),
+
+  const chunks: { since: string; until: string }[] = [];
+  for (let i = 0; i < days.length; i += VISITS_CHUNK_DAYS) {
+    const last = Math.min(i + VISITS_CHUNK_DAYS, days.length) - 1;
+    chunks.push({
+      since: `${days[i]}T00:00:00Z`,
+      // The final chunk runs to now, so today's visits so far are included.
+      until: last === days.length - 1 ? new Date().toISOString() : `${days[last]}T23:59:59Z`,
     });
-    const json = (await res.json()) as VisitsResponse;
-    if (!res.ok || json.errors?.length) {
-      throw new Error(`Cloudflare query failed: ${json.errors?.[0]?.message ?? res.status}`);
-    }
-    const byDay = new Map(
-      (json.data?.viewer?.accounts?.[0]?.series ?? []).map((r) => [
-        r.dimensions.date,
-        r.sum.visits,
-      ]),
+  }
+
+  try {
+    const byDay = new Map<string, number>();
+    await Promise.all(
+      chunks.map(async ({ since, until }) => {
+        const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+          body: JSON.stringify({ query: VISITS_QUERY, variables: { account, site, since, until } }),
+          signal: AbortSignal.timeout(15000),
+        });
+        const json = (await res.json()) as VisitsResponse;
+        if (!res.ok || json.errors?.length) {
+          throw new Error(`Cloudflare query failed: ${json.errors?.[0]?.message ?? res.status}`);
+        }
+        for (const r of json.data?.viewer?.accounts?.[0]?.series ?? []) {
+          byDay.set(r.dimensions.date, r.sum.visits);
+        }
+      }),
     );
     return days.map((day) => byDay.get(day) ?? 0);
   } catch (error) {
