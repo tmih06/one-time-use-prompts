@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Subset the site's web fonts and split each family into core + extended files.
 
-Run by hand (see "Rerun" in font-optimization-report.md):
+Run by hand (rerun when the fontsource packages are upgraded or the site's glyph/weight needs change):
 
     python3 -m venv .venv-fonts
     .venv-fonts/bin/pip install fonttools brotli

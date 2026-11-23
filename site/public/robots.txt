@@ -1,7 +1,6 @@
 # Crawl policy: deliberately open. Search engines and AI crawlers (training and citation alike,
 # e.g. GPTBot, ClaudeBot, Google-Extended, OAI-SearchBot, PerplexityBot) may fetch every page; the
-# library is MIT-licensed and meant to be copied. Decision recorded in SEO-AUDIT-PROGRESS.md.
-User-agent: *
+# library is MIT-licensed and meant to be copied.User-agent: *
 Allow: /
 # The static search index is for the site's own search dialog, not for results pages.
 Disallow: /api/
