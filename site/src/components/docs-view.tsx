@@ -14,7 +14,6 @@ import { SiteProvider } from "@/components/site-provider";
 import { baseOptions } from "@/lib/layout.shared";
 import { contributingUrl, getSourceUrl } from "@/lib/shared";
 import { docs } from "@/lib/source";
-import { tweetIdFromUrl } from "@/lib/tweet";
 
 interface DocsViewProps {
   path: string;
@@ -66,15 +65,6 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
   if (!page) throw new Error(`unknown page: ${path}`);
   const MDX = page.body;
 
-  // Sources that rendered as tweet cards don't need a link chip too — the
-  // card itself links out. Chips stay for everything else, and for tweets
-  // that failed to fetch.
-  const renderedTweetIds = new Set(tweets.map((t) => t.id_str));
-  const sourceChips = (page.source ?? []).filter((url) => {
-    const id = tweetIdFromUrl(url);
-    return !id || !renderedTweetIds.has(id);
-  });
-
   return (
     <SiteProvider pathname={pathname}>
       <DocsLayout
@@ -107,13 +97,13 @@ export function DocsView({ path, pathname, markdownUrl, toc, tree, tweets = [] }
             purpose={page.purpose}
             tags={page.tags}
             author={page.author}
-            source={sourceChips}
+            source={page.source}
           />
           <DocsDescription>{page.description}</DocsDescription>
-          <TweetCards tweets={tweets} />
           <DocsBody>
             <MDX components={getMDXComponents()} />
           </DocsBody>
+          <TweetCards tweets={tweets} />
         </DocsPage>
       </DocsLayout>
       <DrawerTemplate />
