@@ -120,6 +120,17 @@
         "https://x.com/MOVNTDQ/status/2124947434078155043",
         "https://github.com/deterministic-machines/deslop-please"
       ]
+    },
+    {
+      "id": "unslop-ui-design",
+      "title": "Unslop AI-Generated UI Design",
+      "description": "Once per application, when AI-generated screens carry the tell-tale AI look — inventory the tells, codify a binding DESIGN_RULES.md with semantic tokens and motion budgets, fix every violation, and verify with screenshots.",
+      "phase": "existing",
+      "purpose": "polish",
+      "one_time": true,
+      "tags": ["ui", "design", "frontend", "agents", "design-tokens"],
+      "author": "Elia Kuratli (@eliakuratli)",
+      "source": "https://x.com/eliakuratli/status/2124850779639181567"
     }
   ]
 }
