@@ -106,6 +106,20 @@
       "tags": ["design-system", "ui", "audit", "frontend", "consistency"],
       "author": "Sujay (@Sujay__Raj)",
       "source": "https://x.com/Sujay__Raj/status/2123769780192813401"
+    },
+    {
+      "id": "deslop-codebase",
+      "title": "Deslop a Rust Codebase's Structure",
+      "description": "Once per Rust codebase, when its module structure has grown sloppy — run the deslop-please linter and fix every flagged error from first principles toward deep modules and narrow interfaces.",
+      "phase": "existing",
+      "purpose": "maintenance",
+      "one_time": true,
+      "tags": ["rust", "linting", "refactoring", "agents"],
+      "author": "Xiangpeng Hao (@MOVNTDQ)",
+      "source": [
+        "https://x.com/MOVNTDQ/status/2124947434078155043",
+        "https://github.com/deterministic-machines/deslop-please"
+      ]
     }
   ]
 }
