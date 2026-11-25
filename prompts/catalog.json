@@ -167,6 +167,20 @@
       "tags": ["security", "audit", "owasp", "secrets", "abuse-prevention"],
       "author": "Sujay (@Sujay__Raj)",
       "source": "https://x.com/sujay__raj/status/2125211601376550982"
+    },
+    {
+      "id": "refactor-tests",
+      "title": "Refactor Tests to a Written Standard",
+      "description": "Once per TypeScript codebase using Vitest and pnpm, when the test suite needs a deep reset — rewrite tests to the rules for their type, cover every named case, push tests to the fastest proving level, and bring the suite within measured speed budgets.",
+      "phase": "existing",
+      "purpose": "quality",
+      "one_time": true,
+      "tags": ["testing", "refactoring", "typescript", "vitest", "performance"],
+      "author": "Marek Kirejczyk (@zkMarek)",
+      "source": [
+        "https://x.com/zkMarek/status/2125520741709795671",
+        "https://github.com/marekkirejczyk/skills/tree/main/skills/refactor-tests"
+      ]
     }
   ]
 }
