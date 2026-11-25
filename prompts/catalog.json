@@ -131,6 +131,20 @@
       "tags": ["ui", "design", "frontend", "agents", "design-tokens"],
       "author": "Elia Kuratli (@eliakuratli)",
       "source": "https://x.com/eliakuratli/status/2124850779639181567"
+    },
+    {
+      "id": "refactor-ui-design",
+      "title": "Audit and Refactor UI Design",
+      "description": "Once per application, when the UI works but looks off — a diagnostic pass that sweeps seven lenses in fixed causal order (hierarchy to finishing touches), reports severity-ranked findings that each cite a rule, then fixes violations and re-verifies with screenshots.",
+      "phase": "existing",
+      "purpose": "polish",
+      "one_time": true,
+      "tags": ["ui", "design", "audit", "frontend", "design-tokens"],
+      "author": "edisonmbli",
+      "source": [
+        "https://x.com/dopamine_crypto/status/2125363842805088368",
+        "https://github.com/edisonmbli/refactoring-ui-skill"
+      ]
     }
   ]
 }
