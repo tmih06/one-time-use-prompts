@@ -156,6 +156,17 @@
       "tags": ["react", "vite", "tanstack", "performance", "frontend"],
       "author": "Pontus Abrahamsson (@pontusab)",
       "source": "https://x.com/pontusab/status/2125238513478296021"
+    },
+    {
+      "id": "audit-application-security",
+      "title": "Audit Application Security",
+      "description": "Once per application, before it becomes publicly accessible — a defensive OWASP-style audit of source, config, endpoints and dependencies covering exposed secrets, injection paths, session and request protection, and abuse resistance, ending in a severity-ranked remediation plan.",
+      "phase": "existing",
+      "purpose": "security",
+      "one_time": true,
+      "tags": ["security", "audit", "owasp", "secrets", "abuse-prevention"],
+      "author": "Sujay (@Sujay__Raj)",
+      "source": "https://x.com/sujay__raj/status/2125211601376550982"
     }
   ]
 }
