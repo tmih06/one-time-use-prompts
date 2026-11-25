@@ -31,7 +31,24 @@ Help the user add a new prompt to this repo. A prompt is two parts:
   - `tags` — if none are obvious from the content.
     Ask once, collect the answers, then write. Never fill optional fields with guesses.
 
-### 2. Classify phase and purpose
+### 2. Check for duplicates
+
+Before writing anything, check whether this prompt is already in the repo:
+
+- **Same source** — grep `prompts/catalog.json` for the `source` URL or, for
+  tweets, the numeric status ID (`x.com`/`twitter.com` hosts, `?s=` params and
+  casing vary — match on the ID).
+- **Same content** — a near-identical `id`/`title`, or an entry whose steps
+  cover the same scope even when the source differs.
+- **Overlapping scope** — a shared folder or author is not a duplicate by
+  itself (e.g., two security audits with different scope are fine), but flag
+  the overlap to the user so they can judge.
+
+If it is a duplicate, do not write files. Name the existing entry that covers
+it and offer alternatives: skip entirely, or add the new URL to that entry's
+`source` list. Only continue after the user confirms.
+
+### 3. Classify phase and purpose
 
 Ask: is the project already built when this prompt runs?
 
@@ -49,7 +66,7 @@ Ask: is the project already built when this prompt runs?
 Pick exactly one folder. If none fits, propose a new purpose folder to the user before
 creating it (lowercase, singular). If the phase is ambiguous, ask — do not guess.
 
-### 3. Write the prompt file
+### 4. Write the prompt file
 
 Copy `templates/prompt-template.md` to `prompts/<phase>/<purpose>/<kebab-name>.md` and
 fill it in. Keep the author's content faithful — reformat, do not rewrite meaning.
@@ -68,7 +85,7 @@ fill it in. Keep the author's content faithful — reformat, do not rewrite mean
 
 Filename = the `id` (lowercase kebab-case describing the action).
 
-### 4. Add the catalog entry
+### 5. Add the catalog entry
 
 Append to `prompts/catalog.json`:
 
@@ -86,7 +103,7 @@ Append to `prompts/catalog.json`:
 }
 ```
 
-### 5. Validate
+### 6. Validate
 
 ```bash
 python3 scripts/validate-catalog.py
@@ -96,7 +113,7 @@ python3 scripts/scan-prompt-injection.py prompts/<phase>/<purpose>/<file>.md
 Both must pass. Then re-read the file and confirm: all seven sections in order, no
 frontmatter, placeholders in **Inputs** match those in **Instructions**.
 
-### 6. Update docs and commit
+### 7. Update docs and commit
 
 - If you created a new purpose folder, add it to the folder table in `README.md` and to
   `CONTRIBUTING.md`.
@@ -107,6 +124,7 @@ frontmatter, placeholders in **Inputs** match those in **Instructions**.
 
 ## Do not
 
+- Do not add a prompt that duplicates an existing entry without asking first.
 - Do not water down or "improve" the author's content — reformat only.
 - Do not put frontmatter in a prompt file — metadata belongs in `catalog.json`.
 - Do not skip the scanner or the catalog validator even if the prompt looks safe.
