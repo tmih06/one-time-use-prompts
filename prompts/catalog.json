@@ -145,6 +145,17 @@
         "https://x.com/dopamine_crypto/status/2125363842805088368",
         "https://github.com/edisonmbli/refactoring-ui-skill"
       ]
+    },
+    {
+      "id": "build-fast-client-react-app",
+      "title": "Build a Fast Client-Rendered React App",
+      "description": "Once per project, when starting a new client-rendered React app — scaffold it on a pinned Vite/Rolldown/TanStack stack with TanStack Redact as the default renderer, intent-based loading, hard byte budgets in CI, and a measured renderer release decision.",
+      "phase": "creation",
+      "purpose": "foundation",
+      "one_time": true,
+      "tags": ["react", "vite", "tanstack", "performance", "frontend"],
+      "author": "Pontus Abrahamsson (@pontusab)",
+      "source": "https://x.com/pontusab/status/2125238513478296021"
     }
   ]
 }
