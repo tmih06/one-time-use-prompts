@@ -58,6 +58,22 @@ const PURPOSE_TITLES: Record<string, string> = {
 const yaml = (v: string): string => JSON.stringify(v);
 
 /**
+ * Hosted builds (e.g. Cloudflare Pages) use a depth-1 clone where the deploy
+ * commit is a grafted root, so `git log -1` returns it for every file and all
+ * "updated" dates collapse to the deploy date. Restore full history once.
+ */
+async function ensureFullHistory(): Promise<void> {
+  const shallow = (
+    await $`git rev-parse --is-shallow-repository`.cwd(ROOT).nothrow().text()
+  ).trim();
+  if (shallow === "true") {
+    const res = await $`git fetch --unshallow`.cwd(ROOT).quiet().nothrow();
+    if (res.exitCode !== 0)
+      console.error("  could not unshallow git history; 'updated' dates may show the deploy date");
+  }
+}
+
+/**
  * When the prompt file last changed: its latest commit date, or the file's mtime
  * for a prompt that is not committed yet. Needs full git history (CI checks out with fetch-depth: 0).
  */
@@ -94,6 +110,7 @@ async function main(): Promise<void> {
   }
 
   // Read every prompt once (in parallel); both the page and the index use it.
+  await ensureFullHistory();
   const bodies = new Map<string, string>();
   const updated = new Map<string, string>();
   await Promise.all(
