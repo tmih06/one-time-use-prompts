@@ -181,6 +181,17 @@
         "https://x.com/zkMarek/status/2125520741709795671",
         "https://github.com/marekkirejczyk/skills/tree/main/skills/refactor-tests"
       ]
+    },
+    {
+      "id": "prune-agent-context-files",
+      "title": "Prune Agent Context Files",
+      "description": "Once per repository, when CLAUDE.md or AGENTS.md files have grown bloated — audit every line for discoverability and global relevance, move scoped rules into skills, and keep only what agents need every session.",
+      "phase": "existing",
+      "purpose": "documentation",
+      "one_time": true,
+      "tags": ["agents", "context-files", "claude-md", "agents-md", "token-usage"],
+      "author": "Shoopy (@0xShoopy)",
+      "source": "https://x.com/0xShoopy/status/2125567101050015797"
     }
   ]
 }
