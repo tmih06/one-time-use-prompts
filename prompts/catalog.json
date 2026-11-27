@@ -203,6 +203,17 @@
       "tags": ["agents", "performance", "hooks", "observability"],
       "author": "Shin Megami Boson (@shinboson)",
       "source": "https://x.com/shinboson/status/2125979023331189057"
+    },
+    {
+      "id": "audit-web-performance",
+      "title": "Audit Web Performance",
+      "description": "Once per web application, before adding more features — audit source, loading, rendering, asset delivery, data fetching and network behaviour against Core Web Vitals, then produce a measurable prioritized optimization plan.",
+      "phase": "existing",
+      "purpose": "operations",
+      "one_time": true,
+      "tags": ["performance", "web", "core-web-vitals", "audit", "full-stack"],
+      "author": "Sujay (@Sujay__Raj)",
+      "source": "https://x.com/Sujay__Raj/status/2125929910485365018"
     }
   ]
 }
