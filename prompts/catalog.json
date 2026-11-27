@@ -192,6 +192,17 @@
       "tags": ["agents", "context-files", "claude-md", "agents-md", "token-usage"],
       "author": "Shoopy (@0xShoopy)",
       "source": "https://x.com/0xShoopy/status/2125567101050015797"
+    },
+    {
+      "id": "setup-slow-turn-retro-hook",
+      "title": "Set Up a Slow-Turn-Retro Stop Hook",
+      "description": "Once per coding-agent environment, when interactive turns repeatedly waste time on inefficient processes — install a Stop hook that detects 10+ minutes of active work, diagnoses the slowdown, ships safe default-path speedups, and logs ROI telemetry.",
+      "phase": "existing",
+      "purpose": "operations",
+      "one_time": true,
+      "tags": ["agents", "performance", "hooks", "observability"],
+      "author": "Shin Megami Boson (@shinboson)",
+      "source": "https://x.com/shinboson/status/2125979023331189057"
     }
   ]
 }
