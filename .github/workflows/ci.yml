@@ -67,6 +67,9 @@ jobs:
       - name: Typecheck (tsc, root + site)
         run: bun run typecheck
 
+      - name: Unit tests
+        run: bun run test
+
       - name: Build site
         run: bun run build
 

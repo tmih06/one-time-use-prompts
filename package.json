@@ -17,7 +17,8 @@
     "fmt": "vp fmt",
     "check": "vp check",
     "typecheck": "tsc --noEmit && bun run --cwd site types:check",
-    "validate:prompts": "python3 scripts/validate-catalog.py && python3 scripts/scan-prompt-injection.py"
+    "validate:prompts": "python3 scripts/validate-catalog.py && python3 scripts/scan-prompt-injection.py",
+    "test": "bun test tests"
   },
   "devDependencies": {
     "@types/bun": "^1.4.5",

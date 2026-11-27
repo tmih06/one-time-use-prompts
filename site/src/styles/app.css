@@ -191,6 +191,52 @@ html[data-motion] [data-reveal][data-in] {
  * (scripts/gallery.ts places it); until that runs, the active pill paints its own
  * background. The purpose row unfolds by animating its grid track from 0fr to 1fr.
  */
+
+/* Search/tag/sort controls require JavaScript on a static site, so no-JS never shows them. */
+[data-gallery-controls] {
+  display: none;
+}
+html[data-js] [data-gallery-controls] {
+  display: block;
+}
+
+/* The custom clear button replaces the platform search-cancel button. */
+[data-gallery-search]::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.tag-filter {
+  cursor: pointer;
+  border: 0;
+  transition:
+    background-color 150ms var(--ease-out, ease-out),
+    color 150ms,
+    box-shadow 150ms,
+    opacity 150ms,
+    scale 150ms var(--ease-out, ease-out),
+    translate 300ms var(--ease-arrive);
+}
+.tag-filter[aria-pressed="true"] {
+  background: oklch(0.86 0.1 var(--h));
+  color: oklch(0.32 0.17 var(--h));
+  box-shadow: inset 0 0 0 1.5px oklch(0.6 0.16 var(--h) / 0.48);
+}
+.dark .tag-filter[aria-pressed="true"] {
+  background: oklch(0.72 0.14 var(--h) / 0.38);
+  color: oklch(0.92 0.09 var(--h));
+  box-shadow: inset 0 0 0 1.5px oklch(0.78 0.12 var(--h) / 0.42);
+}
+.tag-filter:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+[data-tags-toggle] [data-tags-chevron] {
+  transition: rotate 240ms var(--ease-arrive);
+}
+[data-tags-toggle][aria-expanded="true"] [data-tags-chevron] {
+  rotate: 180deg;
+}
+
 .filter-indicator {
   position: absolute;
   top: 0;
@@ -283,7 +329,9 @@ nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
   .filter-indicator,
   [data-morph] > [data-variant],
   .crumb-link,
-  .filter-pill {
+  .filter-pill,
+  .tag-filter,
+  [data-tags-toggle] [data-tags-chevron] {
     transition: none;
   }
 }

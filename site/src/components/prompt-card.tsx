@@ -44,6 +44,7 @@ export function PromptCard({ prompt: p, hidden }: { prompt: PromptSummary; hidde
       href={`/prompts/${p.splat}`}
       data-reveal
       data-gallery-item
+      data-gallery-prompt-id={p.id}
       data-phase={p.phase}
       data-purpose={p.purpose}
       hidden={hidden}

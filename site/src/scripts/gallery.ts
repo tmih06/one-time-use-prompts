@@ -1,23 +1,61 @@
 /**
- * In-place filtering for the browse pages. Every card is already in the HTML; a
- * filter click re-decides which are shown, animates the change and keeps the
- * address bar on the matching static URL. Without this script each pill is just
- * a link to that URL, so nothing here is required for the page to work.
+ * In-place browsing for the prompt library. Every card is already in the HTML;
+ * this script adds fuzzy search, tag refinement, sorting and the phase/purpose
+ * filters without a round trip. Structural filters still resolve to their static
+ * URLs (/prompts/<phase>/<purpose>), while search, tags and sort are shareable
+ * query parameters. Without this script the phase and purpose pills remain plain
+ * links, so the catalog itself never depends on JavaScript.
  */
 
+import { fuzzyScore, relevantFuzzyScore, type FuzzyDocument } from "@/lib/fuzzy";
 import { trackGalleryFilter } from "./analytics";
 
 const EASE_TRAVEL = "cubic-bezier(0.45, 0, 0.1, 1)";
 const EASE_ARRIVE = "cubic-bezier(0.25, 0.8, 0.25, 1)";
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const root = document.querySelector<HTMLElement>("[data-gallery]");
-if (root) init(root);
+type SortKey = "recommended" | "updated" | "copies" | "views" | "title";
+const SORT_KEYS = new Set<SortKey>(["recommended", "updated", "copies", "views", "title"]);
+const DEFAULT_SORT: SortKey = "recommended";
+
+interface GalleryRecord extends FuzzyDocument {
+  id: string;
+  updated?: string;
+  views: number;
+  copies: number;
+}
+
+interface Entry {
+  record: GalleryRecord;
+  element: HTMLElement;
+  /** Original server order, the final tie-breaker for stable sorting. */
+  position: number;
+}
+
+interface GalleryState {
+  /** "", "<phase>" or "<phase>/<purpose>" — the part encoded in the path. */
+  key: string;
+  query: string;
+  /** Tags are additive: a prompt may match any selected tag. */
+  tags: Set<string>;
+  sort: SortKey;
+}
 
 function init(root: HTMLElement) {
   const grid = root.querySelector<HTMLElement>("[data-gallery-grid]")!;
   const status = root.querySelector<HTMLElement>("[data-gallery-status]")!;
+  const empty = root.querySelector<HTMLElement>("[data-gallery-empty]");
+  const summary = root.querySelector<HTMLElement>("[data-gallery-summary]");
+  const searchInput = root.querySelector<HTMLInputElement>("[data-gallery-search]");
+  const clearSearch = root.querySelector<HTMLButtonElement>("[data-gallery-clear-search]");
+  const sortSelect = root.querySelector<HTMLSelectElement>("[data-gallery-sort]");
+  const reset = root.querySelector<HTMLButtonElement>("[data-gallery-reset]");
+  const resetAdvanced = root.querySelector<HTMLButtonElement>("[data-gallery-reset-advanced]");
+  const tagsToggle = root.querySelector<HTMLButtonElement>("[data-tags-toggle]");
+  const tagsToggleLabel = root.querySelector<HTMLElement>("[data-tags-toggle-label]");
+  const tagButtons = [...root.querySelectorAll<HTMLButtonElement>("button[data-tag-filter]")];
   const items = [...grid.querySelectorAll<HTMLElement>("[data-gallery-item]")];
+  const contribute = grid.querySelector<HTMLElement>("[data-contribute]");
   const navs = [...root.querySelectorAll<HTMLElement>("[data-filter-nav]")];
   const known = new Set(
     [...root.querySelectorAll<HTMLElement>('[data-slot="title"] > [data-variant]')].map(
@@ -38,10 +76,178 @@ function init(root: HTMLElement) {
   };
   const hrefFor = (key: string) => (key ? "/prompts/" + key : "/prompts");
 
-  let current = root.dataset.current ?? "";
+  /* Catalog index ---------------------------------------------------------- */
+
+  const indexScript = root.querySelector<HTMLScriptElement>("script[data-gallery-index]");
+  let records: GalleryRecord[] = [];
+  try {
+    records = JSON.parse(indexScript?.textContent ?? "[]") as GalleryRecord[];
+  } catch (error) {
+    // The static page and its real filter links still work without enhancement.
+    console.error("Gallery index could not be parsed", error);
+    return;
+  }
+  const elementsById = new Map(
+    items
+      .filter((el) => el.dataset.galleryPromptId)
+      .map((el) => [el.dataset.galleryPromptId!, el] as const),
+  );
+  const entries: Entry[] = [];
+  records.forEach((record, position) => {
+    const element = elementsById.get(record.id);
+    if (element) entries.push({ record, element, position });
+  });
+  if (!entries.length) return;
+  const collator = new Intl.Collator("en", { sensitivity: "base" });
+
+  const validTags = new Set(tagButtons.map((button) => button.dataset.tagFilter!));
+
+  function readState(): GalleryState {
+    const params = new URLSearchParams(location.search);
+    const tags = new Set<string>();
+    for (const value of params.getAll("tag")) {
+      if (validTags.has(value)) tags.add(value);
+    }
+    // Accept the compact ?tags=a,b spelling too, even though this app writes repeated tag params.
+    for (const value of (params.get("tags") ?? "").split(",")) {
+      if (validTags.has(value)) tags.add(value);
+    }
+    const sortParam = params.get("sort") as SortKey | null;
+    return {
+      key: keyFromPath(),
+      query: params.get("q") ?? "",
+      tags,
+      sort: sortParam && SORT_KEYS.has(sortParam) ? sortParam : DEFAULT_SORT,
+    };
+  }
+
+  let state = readState();
   // Filtering rewrites the address bar in place, so the tab title follows it.
   const titles: Record<string, string> = JSON.parse(root.dataset.titles ?? "{}");
   let run = 0;
+
+  /* URLs ------------------------------------------------------------------- */
+
+  function urlFor(key = state.key) {
+    const params = new URLSearchParams();
+    const query = state.query.trim();
+    if (query) params.set("q", query);
+    for (const tag of [...state.tags].sort()) params.append("tag", tag);
+    if (state.sort !== DEFAULT_SORT) params.set("sort", state.sort);
+    const search = params.toString();
+    return hrefFor(key) + (search ? "?" + search : "");
+  }
+
+  /** Keep every structural link carrying the current refinements for keyboard/cmd-click use. */
+  function syncLinks() {
+    for (const link of root.querySelectorAll<HTMLAnchorElement>("a[data-filter-key]")) {
+      link.href = urlFor(link.dataset.filterKey ?? "");
+    }
+  }
+
+  function writeUrl(push: boolean) {
+    const next = urlFor();
+    const here = location.pathname + location.search;
+    syncLinks();
+    if (next === here) return;
+    if (push) history.pushState(null, "", next);
+    else history.replaceState(null, "", next);
+  }
+
+  let urlTimer: number | undefined;
+  function writeUrlSoon() {
+    window.clearTimeout(urlTimer);
+    urlTimer = window.setTimeout(() => writeUrl(false), 300);
+  }
+
+  /* Fuzzy matching and sorting --------------------------------------------- */
+
+  let scoredQuery: string | undefined;
+  let scores = new Map<string, number>();
+  let maxScore = 0;
+  let maxScoreScope = "";
+  // Once a strong match exists, weak incidental fuzzy matches are noise rather
+  // than useful results (for example "seo" as scattered letters in other words).
+
+  function scoreFor(entry: Entry): number {
+    const query = state.query.trim();
+    if (!query) return 0;
+    if (scoredQuery !== query) {
+      scoredQuery = query;
+      scores = new Map(
+        entries.map((entry) => [entry.record.id, fuzzyScore(query, entry.record).score] as const),
+      );
+      maxScoreScope = "";
+    }
+    return scores.get(entry.record.id) ?? 0;
+  }
+
+  /** Best score inside the current phase/purpose, so outside results never set the cutoff. */
+  function currentMaxScore(): number {
+    if (!state.query.trim()) return 0;
+    const scope = state.key + "\n" + state.query.trim();
+    if (maxScoreScope !== scope) {
+      maxScoreScope = scope;
+      maxScore = Math.max(0, ...entries.filter(matchesStructure).map(scoreFor));
+    }
+    return maxScore;
+  }
+
+  function relevantScore(entry: Entry): boolean {
+    const score = scoreFor(entry);
+    return relevantFuzzyScore(score, currentMaxScore());
+  }
+
+  const updatedTime = (entry: Entry) => {
+    const time = entry.record.updated ? Date.parse(entry.record.updated) : 0;
+    return Number.isFinite(time) ? time : 0;
+  };
+  const popularity = (entry: Entry) => entry.record.copies * 5 + entry.record.views;
+  const byTitle = (a: Entry, b: Entry) =>
+    collator.compare(a.record.title, b.record.title) || a.position - b.position;
+  const byUpdated = (a: Entry, b: Entry) => updatedTime(b) - updatedTime(a) || byTitle(a, b);
+  const byPopularity = (a: Entry, b: Entry) => popularity(b) - popularity(a) || byUpdated(a, b);
+
+  function compareEntries(a: Entry, b: Entry): number {
+    switch (state.sort) {
+      case "title":
+        return byTitle(a, b);
+      case "updated":
+        return byUpdated(a, b);
+      case "copies":
+        return b.record.copies - a.record.copies || byPopularity(a, b);
+      case "views":
+        return b.record.views - a.record.views || byPopularity(a, b);
+      case "recommended": {
+        if (state.query.trim()) {
+          return scoreFor(b) - scoreFor(a) || byPopularity(a, b);
+        }
+        // With no query, "recommended" means proven first, then fresh, then title.
+        return byPopularity(a, b);
+      }
+    }
+  }
+
+  function matchesStructure(entry: Entry): boolean {
+    const { phase, purpose } = parse(state.key);
+    return (
+      (!phase || entry.record.phase === phase) && (!purpose || entry.record.purpose === purpose)
+    );
+  }
+
+  /** Structural + query match, intentionally ignoring selected tags for facet counts. */
+  function matchesBase(entry: Entry): boolean {
+    if (!matchesStructure(entry)) return false;
+    return !state.query.trim() || relevantScore(entry);
+  }
+
+  function matchesEntry(entry: Entry): boolean {
+    if (!matchesBase(entry)) return false;
+    if (!state.tags.size) return true;
+    return (entry.record.tags ?? []).some((tag) => state.tags.has(tag));
+  }
+
+  const orderedEntries = () => [...entries].sort(compareEntries);
 
   /* Morphing slots -------------------------------------------------------- */
 
@@ -73,10 +279,10 @@ function init(root: HTMLElement) {
   const slot = (name: string) => root.querySelector<HTMLElement>('[data-slot="' + name + '"]')!;
 
   function syncMorphs(animate: boolean) {
-    const { phase, purpose } = parse(current);
-    morph(slot("title"), current, animate);
-    morph(slot("count"), current, animate);
-    morph(slot("blurb"), current, animate);
+    const { phase, purpose } = parse(state.key);
+    morph(slot("title"), state.key, animate);
+    morph(slot("count"), state.key, animate);
+    morph(slot("blurb"), state.key, animate);
     // The breadcrumb keeps its last crumbs while it folds away, so nothing flickers on the way out.
     const crumbs = slot("crumbs");
     morph(crumbs, phase ? "on" : null, animate);
@@ -84,10 +290,10 @@ function init(root: HTMLElement) {
     if (phase && trail) {
       trail.dataset.depth = purpose ? "2" : "1";
       morph(slot("crumb-phase"), phase, animate);
-      morph(slot("crumb-purpose"), purpose ? current : null, animate);
+      morph(slot("crumb-purpose"), purpose ? state.key : null, animate);
       for (const link of trail.querySelectorAll<HTMLElement>("a[data-filter-key]")) {
         const key = link.dataset.filterKey!;
-        const last = key === current;
+        const last = key === state.key;
         link.toggleAttribute("aria-current", last);
         if (last) link.setAttribute("aria-current", "page");
       }
@@ -144,7 +350,7 @@ function init(root: HTMLElement) {
   }
 
   function syncPills() {
-    const { phase } = parse(current);
+    const { phase } = parse(state.key);
     for (const nav of navs) {
       const level = nav.dataset.filterNav;
       const mine = nav.dataset.purposesFor;
@@ -152,7 +358,7 @@ function init(root: HTMLElement) {
         const on =
           level === "phase"
             ? pill.dataset.filterKey === phase
-            : mine === phase && pill.dataset.filterKey === current;
+            : mine === phase && pill.dataset.filterKey === state.key;
         pill.toggleAttribute("aria-current", on);
         if (on) pill.setAttribute("aria-current", "page");
       }
@@ -160,13 +366,79 @@ function init(root: HTMLElement) {
     }
   }
 
+  /* Controls ---------------------------------------------------------------- */
+
+  let tagsExpanded = false;
+  const countLabel = (n: number) => n + (n === 1 ? " prompt" : " prompts");
+
+  function syncTagVisibility() {
+    let collapsedCount = 0;
+    for (const button of tagButtons) {
+      const selected = state.tags.has(button.dataset.tagFilter!);
+      const collapsed = button.hasAttribute("data-tag-extra") && !tagsExpanded && !selected;
+      button.hidden = collapsed;
+      if (collapsed) collapsedCount++;
+    }
+    if (tagsToggle) {
+      tagsToggle.hidden = !tagsExpanded && collapsedCount === 0;
+      tagsToggle.setAttribute("aria-expanded", String(tagsExpanded));
+      if (tagsToggleLabel) {
+        tagsToggleLabel.textContent = tagsExpanded ? "Show fewer" : collapsedCount + " more";
+      }
+    }
+  }
+
+  function syncControls(resultCount: number) {
+    const query = state.query.trim();
+    if (searchInput && searchInput.value !== state.query) searchInput.value = state.query;
+    if (clearSearch) clearSearch.hidden = !state.query;
+    if (sortSelect && sortSelect.value !== state.sort) sortSelect.value = state.sort;
+
+    for (const button of tagButtons) {
+      const tag = button.dataset.tagFilter!;
+      const selected = state.tags.has(tag);
+      const count = entries.filter(
+        (entry) => matchesBase(entry) && (entry.record.tags ?? []).includes(tag),
+      ).length;
+      button.setAttribute("aria-pressed", String(selected));
+      button.disabled = count === 0 && !selected;
+      const countElement = button.querySelector<HTMLElement>("[data-tag-count]");
+      if (countElement) countElement.textContent = String(count);
+    }
+    syncTagVisibility();
+
+    if (summary) {
+      summary.textContent =
+        resultCount === entries.length
+          ? countLabel(entries.length)
+          : "Showing " + resultCount + " of " + countLabel(entries.length);
+    }
+    if (reset) {
+      reset.hidden = !query && state.tags.size === 0 && state.sort === DEFAULT_SORT;
+    }
+    if (empty) empty.hidden = resultCount !== 0;
+  }
+
   /* Cards ------------------------------------------------------------------ */
 
-  const matches = (el: HTMLElement, key: string) => {
-    const { phase, purpose } = parse(key);
-    if (!el.dataset.phase) return true; // the "contribute" card is always there
-    return (!phase || el.dataset.phase === phase) && (!purpose || el.dataset.purpose === purpose);
-  };
+  function currentOrder() {
+    return [...grid.children].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && el.hasAttribute("data-gallery-item"),
+    );
+  }
+
+  function orderDiffers(order: HTMLElement[]) {
+    const current = currentOrder();
+    return current.length !== order.length || current.some((el, i) => el !== order[i]);
+  }
+
+  function applyOrder(order: HTMLElement[]): boolean {
+    if (!orderDiffers(order)) return false;
+    const fragment = document.createDocumentFragment();
+    for (const el of order) fragment.append(el);
+    grid.append(fragment);
+    return true;
+  }
 
   async function syncCards(animate: boolean) {
     const mine = ++run;
@@ -174,19 +446,35 @@ function init(root: HTMLElement) {
     grid.getAnimations().forEach((a) => a.cancel());
     grid.style.overflow = "";
 
-    const shown = items.filter((el) => matches(el, current));
-    const next = new Set(shown);
+    const ordered = orderedEntries();
+    const matching = ordered.filter(matchesEntry);
+    const order = ordered.map((entry) => entry.element);
+    if (contribute) order.push(contribute);
+    const next = new Set<HTMLElement>(matching.map((entry) => entry.element));
+    if (contribute) next.add(contribute); // the contribution card is always there
+
     const before = items.filter((el) => !el.hidden);
     const leaving = before.filter((el) => !next.has(el));
     const entering = items.filter((el) => el.hidden && next.has(el));
     const staying = before.filter((el) => next.has(el));
-    const n = shown.filter((el) => el.dataset.phase).length;
-    status.textContent = n + (n === 1 ? " prompt" : " prompts") + " shown";
+    const n = matching.length;
+    status.textContent = countLabel(n) + " shown";
+    syncControls(n);
 
-    if (!animate || reducedMotion || (!leaving.length && !entering.length)) {
+    const mutate = () => {
+      applyOrder(order);
       for (const el of leaving) el.hidden = true;
-      for (const el of entering) el.hidden = false;
-      for (const el of entering) el.setAttribute("data-in", "");
+      for (const el of entering) {
+        el.hidden = false;
+        el.setAttribute("data-in", "");
+      }
+    };
+
+    const changedOrder = orderDiffers(order);
+    if (!leaving.length && !entering.length && !changedOrder) return;
+
+    if (!animate || reducedMotion) {
+      mutate();
       return;
     }
 
@@ -210,16 +498,8 @@ function init(root: HTMLElement) {
       if (mine !== run) return;
     }
 
-    // 2. Change the layout, then play it backwards (FLIP) so cards glide to their new slots.
-    for (const el of leaving) {
-      for (const a of el.getAnimations()) a.cancel();
-      el.hidden = true;
-    }
-    for (const el of entering) {
-      el.hidden = false;
-      el.setAttribute("data-in", "");
-      el.style.animation = "none"; // the scroll-reveal entrance would fight this one
-    }
+    // 2. Sort and change visibility, then play the movement backwards (FLIP).
+    mutate();
     const heightAfter = grid.getBoundingClientRect().height;
 
     for (const el of staying) {
@@ -236,6 +516,7 @@ function init(root: HTMLElement) {
 
     // 3. New matches rise in, staggered in reading order.
     entering.forEach((el, i) => {
+      el.style.animation = "none"; // the scroll-reveal entrance would fight this one
       el.animate(
         { opacity: [0, 1], transform: ["translateY(16px) scale(0.96)", "none"] },
         {
@@ -261,39 +542,140 @@ function init(root: HTMLElement) {
     }
   }
 
-  /* Wiring ----------------------------------------------------------------- */
+  /* Rendering and state changes -------------------------------------------- */
+
+  function render(animate: boolean) {
+    if (titles[state.key]) document.title = titles[state.key];
+    syncPills();
+    syncMorphs(animate);
+    void syncCards(animate);
+  }
+
+  function commit(push = false, animate = true) {
+    render(animate);
+    writeUrl(push);
+  }
 
   function go(key: string, push: boolean) {
-    if (key === current) return;
-    current = key;
-    if (push) history.pushState(null, "", hrefFor(key));
-    if (titles[key]) document.title = titles[key];
-    syncPills();
-    syncMorphs(true);
-    void syncCards(true);
+    if (key === state.key) return;
+    state.key = key;
+    commit(push, true);
   }
+
+  function clearAdvanced() {
+    state.query = "";
+    state.tags.clear();
+    commit(false, true);
+    searchInput?.focus();
+  }
+
+  /* Wiring ------------------------------------------------------------------ */
 
   root.addEventListener("click", (event) => {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const pill = (event.target as Element).closest<HTMLAnchorElement>("a[data-filter-key]");
-    if (!pill) return;
-    event.preventDefault();
-    const key = pill.dataset.filterKey!;
-    if (event.isTrusted && key !== current) trackGalleryFilter(key);
-    go(key, true);
+    const target = event.target as Element;
+
+    const pill = target.closest<HTMLAnchorElement>("a[data-filter-key]");
+    if (pill) {
+      event.preventDefault();
+      const key = pill.dataset.filterKey!;
+      if (event.isTrusted && key !== state.key) trackGalleryFilter(key);
+      go(key, true);
+      return;
+    }
+
+    const tag = target.closest<HTMLButtonElement>("button[data-tag-filter]");
+    if (tag && !tag.disabled) {
+      const name = tag.dataset.tagFilter!;
+      if (state.tags.has(name)) state.tags.delete(name);
+      else state.tags.add(name);
+      commit(false, true);
+      return;
+    }
+
+    if (resetAdvanced?.contains(target)) {
+      clearAdvanced();
+      return;
+    }
+
+    if (reset?.contains(target)) {
+      state.sort = DEFAULT_SORT;
+      clearAdvanced();
+    }
   });
 
-  addEventListener("popstate", () => go(keyFromPath(), false));
+  searchInput?.addEventListener("input", () => {
+    state.query = searchInput.value;
+    render(true);
+    syncLinks();
+    writeUrlSoon();
+  });
+
+  searchInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (searchInput.value) {
+      state.query = "";
+      commit(false, true);
+    } else {
+      searchInput.blur();
+    }
+  });
+
+  clearSearch?.addEventListener("click", () => {
+    state.query = "";
+    commit(false, true);
+    searchInput?.focus();
+  });
+
+  sortSelect?.addEventListener("change", () => {
+    const value = sortSelect.value as SortKey;
+    state.sort = SORT_KEYS.has(value) ? value : DEFAULT_SORT;
+    commit(false, true);
+  });
+
+  tagsToggle?.addEventListener("click", () => {
+    tagsExpanded = !tagsExpanded;
+    syncTagVisibility();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target;
+    const typing =
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      (target instanceof HTMLElement && target.isContentEditable);
+    if (typing) return;
+    event.preventDefault();
+    searchInput?.focus();
+  });
+
+  addEventListener("popstate", () => {
+    state = readState();
+    render(true);
+    syncLinks();
+  });
 
   // Keep the highlight under its pill when the pills reflow.
   new ResizeObserver(() => {
     for (const nav of navs) place(nav, false);
   }).observe(root);
 
+  tagsExpanded = [...state.tags].some((tag) =>
+    tagButtons.some(
+      (button) => button.dataset.tagFilter === tag && button.hasAttribute("data-tag-extra"),
+    ),
+  );
+
   for (const nav of navs) place(nav, false);
-  syncMorphs(false);
+  render(false);
+  syncLinks();
   void document.fonts?.ready.then(() => {
     for (const nav of navs) place(nav, false);
   });
 }
+
+const root = document.querySelector<HTMLElement>("[data-gallery]");
+if (root) init(root);

@@ -71,6 +71,7 @@ const speculationRules = {
     <link rel="preload" href="/fonts/orbitron-core.woff2" as="font" type="font/woff2" crossorigin />
     <script is:inline>
       (() => {
+        document.documentElement.setAttribute("data-js", "");
         let theme;
         try {
           theme = localStorage.getItem("theme");

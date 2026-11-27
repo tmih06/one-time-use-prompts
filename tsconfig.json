@@ -10,6 +10,6 @@
     "verbatimModuleSyntax": true,
     "types": ["bun"]
   },
-  "include": ["scripts/**/*.ts"],
+  "include": ["scripts/**/*.ts", "tests/**/*.ts"],
   "exclude": ["site", "node_modules"]
 }
