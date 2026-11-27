@@ -199,10 +199,36 @@ html[data-motion] [data-reveal][data-in] {
 html[data-js] [data-gallery-controls] {
   display: block;
 }
+/* Pages with an inline library search use it as their one search entry point. */
+html[data-js] body:has([data-gallery]) :is([data-search], [data-search-full]) {
+  display: none;
+}
 
 /* The custom clear button replaces the platform search-cancel button. */
 [data-gallery-search]::-webkit-search-cancel-button {
   appearance: none;
+}
+
+/* Sort menu: a small raised well that arrives from the pill which opened it. */
+@keyframes sort-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+[data-gallery-sort-menu] {
+  transform-origin: top right;
+  animation: sort-menu-in 170ms var(--ease-arrive);
+}
+[data-gallery-sort-button] [data-gallery-sort-chevron] {
+  transition: rotate 240ms var(--ease-arrive);
+}
+[data-gallery-sort-button][aria-expanded="true"] [data-gallery-sort-chevron] {
+  rotate: 180deg;
+}
+
+[data-sort-value][aria-selected="true"] {
+  color: var(--foreground);
 }
 
 .tag-filter {
@@ -331,8 +357,12 @@ nav[data-depth="2"] [data-slot="crumb-phase"] .crumb-link:hover {
   .crumb-link,
   .filter-pill,
   .tag-filter,
-  [data-tags-toggle] [data-tags-chevron] {
+  [data-tags-toggle] [data-tags-chevron],
+  [data-gallery-sort-button] [data-gallery-sort-chevron] {
     transition: none;
+  }
+  [data-gallery-sort-menu] {
+    animation: none;
   }
 }
 

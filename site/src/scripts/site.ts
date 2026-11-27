@@ -179,7 +179,9 @@ for (const type of ["pointerover", "focusin"] as const) {
 document.addEventListener("keydown", (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
-    openSearch(true);
+    const gallerySearch = document.querySelector<HTMLInputElement>("[data-gallery-search]");
+    if (gallerySearch) gallerySearch.focus();
+    else openSearch(true);
   } else if (
     event.key.toLowerCase() === "d" &&
     !event.metaKey &&

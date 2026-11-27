@@ -1,8 +1,10 @@
 import { ArrowRight, Plus } from "lucide-react";
 import { HeroAnalytics } from "@/components/analytics-panels";
+import { GalleryControls, GalleryEmptyState } from "@/components/gallery-controls";
 import { PromptCard, shell } from "@/components/prompt-card";
 import { HomeShell } from "@/components/site-provider";
 import { analytics } from "@/lib/analytics";
+import { recommendedOrder } from "@/lib/gallery-utils";
 import { count, PHASES, type PromptSummary } from "@/lib/prompts";
 import { contributingUrl } from "@/lib/shared";
 
@@ -10,6 +12,8 @@ const pill =
   "press group inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-medium";
 
 export function Home({ prompts }: { prompts: PromptSummary[] }) {
+  const orderedPrompts = recommendedOrder(prompts);
+
   return (
     <HomeShell pathname="/">
       <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 sm:px-6">
@@ -58,7 +62,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
           </div>
         </section>
 
-        <section className="py-16" aria-labelledby="all-prompts">
+        <section data-gallery data-gallery-base="/" className="py-16" aria-labelledby="all-prompts">
           <div data-reveal className="mb-8 flex items-end justify-between gap-4">
             <h2 id="all-prompts" className="text-2xl font-semibold tracking-tight">
               All prompts
@@ -67,8 +71,9 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
               {count(prompts.length)}
             </span>
           </div>
+          <GalleryControls prompts={prompts} visibleCount={prompts.length} className="mt-0" />
           {/* Phases live here as filters, not a section of their own. A phase with no prompts has no page yet. */}
-          <nav data-reveal aria-label="Browse by phase" className="-mt-4 mb-8 flex flex-wrap gap-2">
+          <nav data-reveal aria-label="Browse by phase" className="mt-8 mb-8 flex flex-wrap gap-2">
             {PHASES.map((phase) => {
               const n = prompts.filter((p) => p.phase === phase.slug).length;
               const body = (
@@ -85,6 +90,7 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
                 <a
                   key={phase.slug}
                   href={`/prompts/${phase.slug}`}
+                  data-gallery-phase-link={phase.slug}
                   title={phase.blurb}
                   className={`${base} text-foreground/80 hover:bg-surface-raised hover:text-foreground`}
                 >
@@ -97,8 +103,13 @@ export function Home({ prompts }: { prompts: PromptSummary[] }) {
               );
             })}
           </nav>
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {prompts.map((p) => (
+          <p className="sr-only" role="status" aria-live="polite" data-gallery-status />
+          <GalleryEmptyState />
+          <div
+            data-gallery-grid
+            className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {orderedPrompts.map((p) => (
               <PromptCard key={p.splat} prompt={p} />
             ))}
           </div>

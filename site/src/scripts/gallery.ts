@@ -8,14 +8,14 @@
  */
 
 import { fuzzyScore, relevantFuzzyScore, type FuzzyDocument } from "@/lib/fuzzy";
+import { SORT_OPTIONS, type SortKey } from "@/lib/gallery-utils";
 import { trackGalleryFilter } from "./analytics";
 
 const EASE_TRAVEL = "cubic-bezier(0.45, 0, 0.1, 1)";
 const EASE_ARRIVE = "cubic-bezier(0.25, 0.8, 0.25, 1)";
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-type SortKey = "recommended" | "updated" | "copies" | "views" | "title";
-const SORT_KEYS = new Set<SortKey>(["recommended", "updated", "copies", "views", "title"]);
+const SORT_KEYS = new Set<SortKey>(SORT_OPTIONS.map((option) => option.value));
 const DEFAULT_SORT: SortKey = "recommended";
 
 interface GalleryRecord extends FuzzyDocument {
@@ -48,7 +48,11 @@ function init(root: HTMLElement) {
   const summary = root.querySelector<HTMLElement>("[data-gallery-summary]");
   const searchInput = root.querySelector<HTMLInputElement>("[data-gallery-search]");
   const clearSearch = root.querySelector<HTMLButtonElement>("[data-gallery-clear-search]");
-  const sortSelect = root.querySelector<HTMLSelectElement>("[data-gallery-sort]");
+  const sortRoot = root.querySelector<HTMLElement>("[data-gallery-sort]");
+  const sortButton = root.querySelector<HTMLButtonElement>("[data-gallery-sort-button]");
+  const sortMenu = root.querySelector<HTMLElement>("[data-gallery-sort-menu]");
+  const sortLabel = root.querySelector<HTMLElement>("[data-gallery-sort-label]");
+  const sortOptions = [...root.querySelectorAll<HTMLButtonElement>("[data-sort-value]")];
   const reset = root.querySelector<HTMLButtonElement>("[data-gallery-reset]");
   const resetAdvanced = root.querySelector<HTMLButtonElement>("[data-gallery-reset-advanced]");
   const tagsToggle = root.querySelector<HTMLButtonElement>("[data-tags-toggle]");
@@ -67,14 +71,20 @@ function init(root: HTMLElement) {
     const [phase = "", purpose = ""] = key.split("/");
     return { phase, purpose };
   };
+  // Browse galleries encode phase/purpose in /prompts; the homepage gallery is a
+  // simple all-library view whose query string stays on /.
+  const structural = root.hasAttribute("data-gallery-structure");
+  const basePath = root.dataset.galleryBase ?? "/prompts";
+  const baseWithoutSlash = basePath.replace(/\/$/, "");
   const keyFromPath = () => {
+    if (!structural) return "";
     const key = location.pathname
       .replace(/^\/prompts\/?/, "")
       .replace(/\.html$/, "")
       .replace(/\/$/, "");
     return known.has(key) ? key : "";
   };
-  const hrefFor = (key: string) => (key ? "/prompts/" + key : "/prompts");
+  const hrefFor = (key: string) => (key ? baseWithoutSlash + "/" + key : basePath);
 
   /* Catalog index ---------------------------------------------------------- */
 
@@ -128,20 +138,29 @@ function init(root: HTMLElement) {
 
   /* URLs ------------------------------------------------------------------- */
 
-  function urlFor(key = state.key) {
+  function refinementSearch() {
     const params = new URLSearchParams();
     const query = state.query.trim();
     if (query) params.set("q", query);
     for (const tag of [...state.tags].sort()) params.append("tag", tag);
     if (state.sort !== DEFAULT_SORT) params.set("sort", state.sort);
     const search = params.toString();
-    return hrefFor(key) + (search ? "?" + search : "");
+    return search ? "?" + search : "";
   }
 
-  /** Keep every structural link carrying the current refinements for keyboard/cmd-click use. */
+  function urlFor(key = state.key) {
+    return hrefFor(key) + refinementSearch();
+  }
+
+  /** Keep structural links carrying the current refinements for keyboard/cmd-click use. */
   function syncLinks() {
     for (const link of root.querySelectorAll<HTMLAnchorElement>("a[data-filter-key]")) {
       link.href = urlFor(link.dataset.filterKey ?? "");
+    }
+    // Homepage phase links navigate to the browse gallery rather than filtering in place,
+    // but they still carry the search, tags and sort the visitor already chose.
+    for (const link of root.querySelectorAll<HTMLAnchorElement>("a[data-gallery-phase-link]")) {
+      link.href = "/prompts/" + link.dataset.galleryPhaseLink + refinementSearch();
     }
   }
 
@@ -276,42 +295,50 @@ function init(root: HTMLElement) {
     slot.animate({ [axis]: [from + "px", to + "px"] }, { duration: 520, easing: EASE_TRAVEL });
   }
 
-  const slot = (name: string) => root.querySelector<HTMLElement>('[data-slot="' + name + '"]')!;
+  const slot = (name: string) => root.querySelector<HTMLElement>('[data-slot="' + name + '"]');
+  const morphSlot = (name: string, key: string | null, animate: boolean) => {
+    const element = slot(name);
+    if (element) morph(element, key, animate);
+  };
 
   function syncMorphs(animate: boolean) {
     const { phase, purpose } = parse(state.key);
-    morph(slot("title"), state.key, animate);
-    morph(slot("count"), state.key, animate);
-    morph(slot("blurb"), state.key, animate);
+    morphSlot("title", state.key, animate);
+    morphSlot("count", state.key, animate);
+    morphSlot("blurb", state.key, animate);
     // The breadcrumb keeps its last crumbs while it folds away, so nothing flickers on the way out.
     const crumbs = slot("crumbs");
-    morph(crumbs, phase ? "on" : null, animate);
-    const trail = crumbs.querySelector<HTMLElement>("nav");
-    if (phase && trail) {
-      trail.dataset.depth = purpose ? "2" : "1";
-      morph(slot("crumb-phase"), phase, animate);
-      morph(slot("crumb-purpose"), purpose ? state.key : null, animate);
-      for (const link of trail.querySelectorAll<HTMLElement>("a[data-filter-key]")) {
-        const key = link.dataset.filterKey!;
-        const last = key === state.key;
-        link.toggleAttribute("aria-current", last);
-        if (last) link.setAttribute("aria-current", "page");
+    if (crumbs) {
+      morph(crumbs, phase ? "on" : null, animate);
+      const trail = crumbs.querySelector<HTMLElement>("nav");
+      if (phase && trail) {
+        trail.dataset.depth = purpose ? "2" : "1";
+        morphSlot("crumb-phase", phase, animate);
+        morphSlot("crumb-purpose", purpose ? state.key : null, animate);
+        for (const link of trail.querySelectorAll<HTMLElement>("a[data-filter-key]")) {
+          const key = link.dataset.filterKey!;
+          const last = key === state.key;
+          link.toggleAttribute("aria-current", last);
+          if (last) link.setAttribute("aria-current", "page");
+        }
       }
     }
     const purposes = slot("purposes");
-    const has = purposes.querySelector('[data-variant="' + phase + '"]');
-    const entering = has && !has.hasAttribute("data-active");
-    morph(purposes, phase && has ? phase : null, animate);
-    if (entering && animate && !reducedMotion) {
-      // The new row's pills settle in one after another.
-      has!
-        .querySelectorAll<HTMLElement>("a")
-        .forEach((pill, i) =>
-          pill.animate(
-            { opacity: [0, 1], transform: ["translateY(8px) scale(0.94)", "none"] },
-            { duration: 420, delay: 120 + i * 45, easing: EASE_ARRIVE, fill: "backwards" },
-          ),
-        );
+    if (purposes) {
+      const has = purposes.querySelector('[data-variant="' + phase + '"]');
+      const entering = has && !has.hasAttribute("data-active");
+      morph(purposes, phase && has ? phase : null, animate);
+      if (entering && animate && !reducedMotion) {
+        // The new row's pills settle in one after another.
+        has!
+          .querySelectorAll<HTMLElement>("a")
+          .forEach((pill, i) =>
+            pill.animate(
+              { opacity: [0, 1], transform: ["translateY(8px) scale(0.94)", "none"] },
+              { duration: 420, delay: 120 + i * 45, easing: EASE_ARRIVE, fill: "backwards" },
+            ),
+          );
+      }
     }
   }
 
@@ -388,11 +415,68 @@ function init(root: HTMLElement) {
     }
   }
 
+  function selectedSortOption() {
+    return sortOptions.find((button) => button.dataset.sortValue === state.sort) ?? sortOptions[0];
+  }
+
+  function syncSortMenu() {
+    const selected = selectedSortOption();
+    for (const option of sortOptions) {
+      const on = option === selected;
+      option.setAttribute("aria-selected", String(on));
+      const check = option.querySelector<HTMLElement>("[data-sort-check]");
+      if (check) check.hidden = !on;
+    }
+    const label = selected?.querySelector<HTMLElement>("[data-sort-label]");
+    if (sortLabel && label) sortLabel.textContent = label.textContent;
+  }
+
+  let sortOpen = false;
+  let sortTypeahead = "";
+  let sortTypeaheadTimer: number | undefined;
+
+  function focusSortOption(which: "selected" | "first" | "last") {
+    const selected = Math.max(0, sortOptions.indexOf(selectedSortOption()!));
+    const index = which === "first" ? 0 : which === "last" ? sortOptions.length - 1 : selected;
+    sortOptions[index]?.focus();
+  }
+
+  function typeaheadSortOption(key: string) {
+    sortTypeahead += key.toLowerCase();
+    window.clearTimeout(sortTypeaheadTimer);
+    sortTypeaheadTimer = window.setTimeout(() => (sortTypeahead = ""), 700);
+    const match = sortOptions.find((option) =>
+      (option.textContent ?? "").trim().toLowerCase().startsWith(sortTypeahead),
+    );
+    match?.focus();
+  }
+
+  function setSortOpen(open: boolean, focus?: "selected" | "first" | "last") {
+    if (!sortButton || !sortMenu) return;
+    sortOpen = open;
+    sortMenu.hidden = !open;
+    sortButton.setAttribute("aria-expanded", String(open));
+    if (open && focus) focusSortOption(focus);
+  }
+
+  function closeSortMenu(restoreFocus = false) {
+    if (!sortOpen) return;
+    setSortOpen(false);
+    if (restoreFocus) sortButton?.focus();
+  }
+
+  function chooseSort(option: HTMLButtonElement) {
+    const value = option.dataset.sortValue as SortKey | undefined;
+    state.sort = value && SORT_KEYS.has(value) ? value : DEFAULT_SORT;
+    closeSortMenu(true);
+    commit(false, true);
+  }
+
   function syncControls(resultCount: number) {
     const query = state.query.trim();
     if (searchInput && searchInput.value !== state.query) searchInput.value = state.query;
     if (clearSearch) clearSearch.hidden = !state.query;
-    if (sortSelect && sortSelect.value !== state.sort) sortSelect.value = state.sort;
+    syncSortMenu();
 
     for (const button of tagButtons) {
       const tag = button.dataset.tagFilter!;
@@ -628,10 +712,66 @@ function init(root: HTMLElement) {
     searchInput?.focus();
   });
 
-  sortSelect?.addEventListener("change", () => {
-    const value = sortSelect.value as SortKey;
-    state.sort = SORT_KEYS.has(value) ? value : DEFAULT_SORT;
-    commit(false, true);
+  sortButton?.addEventListener("click", () => {
+    if (sortOpen) closeSortMenu();
+    else setSortOpen(true, "selected");
+  });
+
+  sortButton?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setSortOpen(true, event.key === "ArrowUp" ? "last" : "selected");
+    } else if (event.key === "Escape" && sortOpen) {
+      event.preventDefault();
+      closeSortMenu(true);
+    }
+  });
+
+  sortMenu?.addEventListener("keydown", (event) => {
+    if (!sortOpen) return;
+    const current = sortOptions.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const delta = event.key === "ArrowDown" ? 1 : -1;
+      const start =
+        current >= 0 ? current : Math.max(0, sortOptions.indexOf(selectedSortOption()!));
+      const next = Math.min(sortOptions.length - 1, Math.max(0, start + delta));
+      sortOptions[next]?.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      sortOptions[0]?.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      sortOptions[sortOptions.length - 1]?.focus();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeSortMenu(true);
+    } else if (event.key === "Tab") {
+      closeSortMenu();
+    } else if (
+      event.key.length === 1 &&
+      event.key !== " " &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey
+    ) {
+      event.preventDefault();
+      typeaheadSortOption(event.key);
+    }
+  });
+
+  for (const option of sortOptions) {
+    option.addEventListener("click", () => chooseSort(option));
+  }
+
+  document.addEventListener("pointerdown", (event) => {
+    if (!sortOpen || !(event.target instanceof Node) || sortRoot?.contains(event.target)) return;
+    closeSortMenu();
+  });
+
+  document.addEventListener("focusin", (event) => {
+    if (!sortOpen || !(event.target instanceof Node) || sortRoot?.contains(event.target)) return;
+    closeSortMenu();
   });
 
   tagsToggle?.addEventListener("click", () => {
